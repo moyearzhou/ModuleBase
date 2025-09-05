@@ -77,6 +77,18 @@ dependencies:
   # dio
   dio: ^5.4.0
 
+  json_annotation: ^4.9.0
+  json_serializable: ^6.8.0
+
+  pretty_dio_logger: ^1.2.0  # 请确保使用最新版本
+
+  path: ^1.8.3
+
+  flutter_svg: ^2.0.7  # svg
+
+  # 获取储存路径
+  path_provider: ^2.0.15
+
   # Bruno UI组件库
   #  bruno: ^3.4.3
   bruno:
