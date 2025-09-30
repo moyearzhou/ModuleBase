@@ -192,11 +192,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "4.6.5"
-      resolved-ref: "6df80cc1ea425cde1bac7d0265407977221061df"
+      ref: "5.0.2"
+      resolved-ref: "622e243416a04aae74845fc42444c5cd09eb15b0"
       url: "https://github.com/alibaba/flutter_boost.git"
     source: git
-    version: "4.6.5"
+    version: "5.0.2"
   flutter_dotenv:
     dependency: "direct main"
     description:
@@ -833,15 +833,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
-  webdav_client:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: "v1.0.66"
-      resolved-ref: "1908cd0f4909730d9ae4d4fc4c05fb2576b3f674"
-      url: "https://github.com/lollipopkit/webdav_client"
-    source: git
-    version: "1.2.2"
   webview_flutter:
     dependency: "direct main"
     description:
