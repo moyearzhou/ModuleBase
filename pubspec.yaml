@@ -89,6 +89,8 @@ dependencies:
   # 获取储存路径
   path_provider: ^2.0.15
 
+  event_bus: ^2.0.1
+
   # Bruno UI组件库
   #  bruno: ^3.4.3
   bruno:
