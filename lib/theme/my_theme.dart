@@ -16,7 +16,7 @@ class AppThemes {
       ),
     ),
     colorScheme: const ColorScheme.light(
-      primary: Colors.blue,
+      primary: const Color(0xFF576DD9),
       secondary: Colors.orange,
       background: Colors.white,
     ),
