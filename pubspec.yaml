@@ -99,6 +99,12 @@ dependencies:
       url: https://github.com/moyearzhou/bruno-moyear.git
   #      ref: v3.4.3
 
+  #  webdav_client: ^1.2.2
+  webdav_client:
+    path: /Users/moyearzhou/StudioProjects/webdav_client2
+#    git:
+#      url: git@github.com:moyearzhou/webdav_client2.git
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -108,6 +114,9 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 flutter:
+  assets:
+    - assets/
+    - assets/image/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
