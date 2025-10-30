@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppThemes {
+
+  static var textMain = const Color(0xFF313E5E);
+  static var selectedTextColor = const Color(0xFF576DD9);
+  static var selectedBgColor = const Color(0xFFdde2f7);
+  static var divideColor = const Color(0xFFcccccc);
+  static var bgColor = Colors.white;
+
+  static var bgAccent = const Color(0xFF576DD9);
+
   static final ThemeData lightTheme = ThemeData(
     // brightness: Brightness.light,
     primaryColor: const Color(0xFFFFFFFF), // 主题主色
