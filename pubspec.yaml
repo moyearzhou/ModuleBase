@@ -99,6 +99,24 @@ dependencies:
       url: https://github.com/moyearzhou/bruno-moyear.git
   #      ref: v3.4.3
 
+  # bugly
+  flutter_bugly: ^1.1.0
+
+  # supabase
+  supabase_flutter: ^2.10.3
+
+  # device_info
+  device_info_plus: ^11.3.0
+
+  # package_info
+  package_info_plus: ^4.1.0
+
+  # connectivity
+  connectivity_plus: ^5.0.0
+
+  # uuid
+  uuid: ^4.5.1
+
   #  webdav_client: ^1.2.2
   webdav_client:
     path: /Users/moyearzhou/StudioProjects/webdav_client2
