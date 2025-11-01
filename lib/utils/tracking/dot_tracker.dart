@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../device/device_info_helper.dart';
+import '../device/device_utils.dart';
 import '../log/app_log_event.dart';
 import '../user/app_user_helper.dart';
 
@@ -22,6 +23,10 @@ class DotTracker {
   });
 
   static DotTracker addBot(eventName, {description = "", Map<String, dynamic>? properties}) {
+    return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
+  }
+  
+  static DotTracker addDot(eventName, {description = "", Map<String, dynamic>? properties}) {
     return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
   }
 
@@ -68,6 +73,12 @@ Future<void> reportDotEvent({
 
     final uuid = await AppUserHelper.getUUID();
 
+    var deviceType = "Phone";
+    var isTablet = await DeviceUtils.isTabletDevice();
+    if (isTablet) {
+      deviceType = "Tablet";
+    }
+
     await supabase
         .from('tracking_events')
         .insert({
@@ -88,6 +99,7 @@ Future<void> reportDotEvent({
         'manufacturer': manufacturer,
         'sdkInt': sdkInt,
         'base_OS': baseOS,
+        'device_type': deviceType,
       },
       // 'user_id': '', // 如果有的话
       'network_info': {

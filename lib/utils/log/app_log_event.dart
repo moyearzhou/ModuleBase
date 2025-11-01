@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:module_base/utils/device/device_utils.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../device/device_info_helper.dart';
@@ -68,6 +69,12 @@ Future<void> logEvent({
 
     final uuid = await AppUserHelper.getUUID();
 
+    var deviceType = "Phone";
+    var isTablet = await DeviceUtils.isTabletDevice();
+    if (isTablet) {
+      deviceType = "Tablet";
+    }
+
     await supabase
         .from('zotpaper_logs')
         .insert({
@@ -84,6 +91,7 @@ Future<void> logEvent({
         'manufacturer': manufacturer,
         'sdkInt': sdkInt,
         'base_OS': baseOS,
+        'device_type': deviceType,
       },
       // 'user_id': '', // 如果有的话
       'network_info': {
