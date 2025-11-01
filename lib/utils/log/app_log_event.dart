@@ -19,6 +19,7 @@ enum LogLevel {
   info,
   warning,
   error,
+  fatal,
   debug;
 
   String toLevel() {
@@ -31,6 +32,8 @@ enum LogLevel {
         return "error";
       case LogLevel.debug:
         return "debug";
+      case LogLevel.fatal:
+        return "fatal";
       default:
         return "info";
     }
