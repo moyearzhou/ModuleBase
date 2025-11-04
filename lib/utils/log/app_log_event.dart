@@ -10,9 +10,6 @@ import '../user/app_user_helper.dart';
 
 final supabase = Supabase.instance.client;
 
-final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
-final Connectivity connectivity = Connectivity();
 
 Map<String, dynamic>? appInfo;
 
@@ -41,6 +38,16 @@ enum LogLevel {
   }
 }
 
+Connectivity requiresConnectivity() {
+  final Connectivity connectivity = Connectivity();
+  return connectivity;
+}
+
+DeviceInfoPlugin requiresDeviceInfo() {
+  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  return deviceInfo;
+}
+
 Future<void> logEvent({
   LogLevel logLevel = LogLevel.info,
   String? stackTrace,
@@ -49,7 +56,7 @@ Future<void> logEvent({
   debugPrint("Supabase 记录日志： $message");
 
   try {
-    var info = await deviceInfo.androidInfo;
+    var info = await requiresDeviceInfo().androidInfo;
     String brand = info.brand;
     String product = info.product;
     String model = info.model;
@@ -64,7 +71,7 @@ Future<void> logEvent({
 
     appInfo ??= await DeviceService.getAppInfo();
 
-    var connectivityResult = await connectivity.checkConnectivity();
+    var connectivityResult = await requiresConnectivity().checkConnectivity();
     var networkType = parserNetworkType(connectivityResult);
 
     final uuid = await AppUserHelper.getUUID();
