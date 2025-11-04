@@ -53,7 +53,7 @@ Future<void> reportDotEvent({
   debugPrint("Supabase 埋点上报： $eventName");
 
   try {
-    var info = await deviceInfo.androidInfo;
+    var info = await requiresDeviceInfo().androidInfo;
     String brand = info.brand;
     String product = info.product;
     String model = info.model;
@@ -68,7 +68,7 @@ Future<void> reportDotEvent({
 
     appInfo ??= await DeviceService.getAppInfo();
 
-    var connectivityResult = await connectivity.checkConnectivity();
+    var connectivityResult = await requiresConnectivity().checkConnectivity();
     var networkType = parserNetworkType(connectivityResult);
 
     final uuid = await AppUserHelper.getUUID();
