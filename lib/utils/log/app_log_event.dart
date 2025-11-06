@@ -56,18 +56,18 @@ Future<void> logEvent({
   debugPrint("Supabase 记录日志： $message");
 
   try {
-    var info = await requiresDeviceInfo().androidInfo;
-    String brand = info.brand;
-    String product = info.product;
-    String model = info.model;
-    String deviceName = info.name;
+    var infoMap = await DeviceService.getDeviceInfo();
+    String brand = infoMap['brand']?? "";
+    String product = infoMap['product']?? "";
+    String model = infoMap['model']?? "";
+    String deviceName = infoMap['deviceName']?? "";
 
-    String hardware = info.hardware;
-    String manufacturer = info.manufacturer;
-    String sdkInt = info.version.sdkInt.toString();
-    String baseOS = info.version.baseOS.toString();
+    String hardware = infoMap['hardware']?? "";
+    String manufacturer = infoMap['manufacturer']?? "";
+    String sdkInt = infoMap['version']['sdkInt'] ?? "";
+    String baseOS = infoMap['version']['baseOS'] ?? "";
 
-    String osVersion = info.version.release.toString();
+    String osVersion = infoMap['version']['osVersion'] ?? "";
 
     appInfo ??= await DeviceService.getAppInfo();
 

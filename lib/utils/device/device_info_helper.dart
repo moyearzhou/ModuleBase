@@ -6,6 +6,8 @@ import 'app_info_service.dart';
 
 class DeviceService {
 
+  static Future<Map<String, dynamic>>? _harmonyDeviceInfoHook;
+
   // 初始化所有服务
   static Future<void> initialize() async {
     await AppInfoService.initialize();
@@ -18,6 +20,8 @@ class DeviceService {
         return await _getAndroidDeviceInfo();
       } else if (Platform.isIOS) {
         return await _getIOSDeviceInfo();
+      } else if (Platform.operatingSystem == "ohos") {
+        return await _getHarmonyDeviceInfo();
       } else {
         return _getBasicDeviceInfo();
       }
@@ -78,6 +82,15 @@ class DeviceService {
       'isPhysicalDevice': iosInfo.isPhysicalDevice,
       'identifierForVendor': iosInfo.identifierForVendor,
     };
+  }
+
+  static void registerHarmonyDeviceInfoHook(Future<Map<String, dynamic>> method) async {
+    _harmonyDeviceInfoHook = method;
+  }
+
+  // 获取鸿蒙设备信息
+  static Future<Map<String, dynamic>> _getHarmonyDeviceInfo() async {
+    return await _harmonyDeviceInfoHook ?? {};
   }
 
   // 基础设备信息（备用）
@@ -160,20 +173,20 @@ class DeviceService {
     });
   }
 
-  // 获取设备唯一标识
-  static Future<String> getDeviceId() async {
-    try {
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await requiresDeviceInfo().androidInfo;
-        return androidInfo.id;
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await requiresDeviceInfo().iosInfo;
-        return iosInfo.identifierForVendor ?? 'unknown_ios_id';
-      } else {
-        return 'unknown_platform';
-      }
-    } catch (e) {
-      return 'error_getting_device_id';
-    }
-  }
+  // // 获取设备唯一标识
+  // static Future<String> getDeviceId() async {
+  //   try {
+  //     if (Platform.isAndroid) {
+  //       AndroidDeviceInfo androidInfo = await requiresDeviceInfo().androidInfo;
+  //       return androidInfo.id;
+  //     } else if (Platform.isIOS) {
+  //       IosDeviceInfo iosInfo = await requiresDeviceInfo().iosInfo;
+  //       return iosInfo.identifierForVendor ?? 'unknown_ios_id';
+  //     } else {
+  //       return 'unknown_platform';
+  //     }
+  //   } catch (e) {
+  //     return 'error_getting_device_id';
+  //   }
+  // }
 }
