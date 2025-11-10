@@ -123,6 +123,8 @@ dependencies:
 #    git:
 #      url: git@github.com:moyearzhou/webdav_client2.git
 
+  open_filex: ^4.5.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
