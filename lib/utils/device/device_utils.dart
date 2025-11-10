@@ -50,3 +50,8 @@ class DeviceUtils {
     return mediaQuery.size.shortestSide > 600;
   }
 }
+
+/// 判断是否为华为鸿蒙系统
+isHarmonyOS() {
+  return Platform.operatingSystem == "ohos";
+}
