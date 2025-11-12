@@ -61,7 +61,7 @@ Future<void> reportDotEvent({
 
     String hardware = infoMap['hardware']?? "";
     String manufacturer = infoMap['manufacturer']?? "";
-    String sdkInt = infoMap['version']['sdkInt'] ?? "";
+    String sdkInt = infoMap['version']['sdkInt'].toString() ?? "";
     String baseOS = infoMap['version']['baseOS'] ?? "";
 
     String osVersion = infoMap['version']['osVersion'] ?? "";
