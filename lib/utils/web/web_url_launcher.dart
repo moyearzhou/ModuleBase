@@ -25,14 +25,14 @@ class WebUrlLauncher {
         res = await _harmonyWebLauncher?.call(url) ?? false;
       } else {
         final Uri uri = Uri.parse(url);
-        res = await canLaunchUrl(uri);
+        res = await launchUrl(uri);
       }
       if (!res) {
-        throw Exception('Could not launch $url');
+        throw Exception('launch failed');
       }
     } catch (e) {
       debugPrint("访问网页失败: $e");
-      onError?.call(Exception('Could not launch $url, $e'));
+      onError?.call(Exception('Could not launch $url, errorMsg: $e'));
     }
   }
 }
