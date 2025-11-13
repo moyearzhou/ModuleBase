@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:module_base/utils/log/app_log_event.dart';
 import 'app_info_service.dart';
 
 class DeviceService {
-  static final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  static final Connectivity connectivity = Connectivity();
+
+  static Future<Map<String, dynamic>>? _harmonyDeviceInfoHook;
 
   // 初始化所有服务
   static Future<void> initialize() async {
@@ -19,6 +20,8 @@ class DeviceService {
         return await _getAndroidDeviceInfo();
       } else if (Platform.isIOS) {
         return await _getIOSDeviceInfo();
+      } else if (Platform.operatingSystem == "ohos") {
+        return await _getHarmonyDeviceInfo();
       } else {
         return _getBasicDeviceInfo();
       }
@@ -29,7 +32,7 @@ class DeviceService {
 
   // 获取 Android 设备信息
   static Future<Map<String, dynamic>> _getAndroidDeviceInfo() async {
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    AndroidDeviceInfo androidInfo = await requiresDeviceInfo().androidInfo;
 
     return {
       'platform': 'android',
@@ -61,7 +64,7 @@ class DeviceService {
 
   // 获取 iOS 设备信息
   static Future<Map<String, dynamic>> _getIOSDeviceInfo() async {
-    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    IosDeviceInfo iosInfo = await requiresDeviceInfo().iosInfo;
 
     return {
       'platform': 'ios',
@@ -79,6 +82,15 @@ class DeviceService {
       'isPhysicalDevice': iosInfo.isPhysicalDevice,
       'identifierForVendor': iosInfo.identifierForVendor,
     };
+  }
+
+  static void registerHarmonyDeviceInfoHook(Future<Map<String, dynamic>> method) async {
+    _harmonyDeviceInfoHook = method;
+  }
+
+  // 获取鸿蒙设备信息
+  static Future<Map<String, dynamic>> _getHarmonyDeviceInfo() async {
+    return await _harmonyDeviceInfoHook ?? {};
   }
 
   // 基础设备信息（备用）
@@ -116,7 +128,7 @@ class DeviceService {
   // 获取网络类型
   static Future<String> getNetworkType() async {
     try {
-      var connectivityResult = await connectivity.checkConnectivity();
+      var connectivityResult = await requiresConnectivity().checkConnectivity();
 
       switch (connectivityResult) {
         case ConnectivityResult.wifi:
@@ -141,7 +153,7 @@ class DeviceService {
 
   // 监听网络状态变化
   static Stream<String> get onNetworkStateChanged {
-    return connectivity.onConnectivityChanged.map((result) {
+    return requiresConnectivity().onConnectivityChanged.map((result) {
       switch (result) {
         case ConnectivityResult.wifi:
           return 'wifi';
@@ -161,20 +173,20 @@ class DeviceService {
     });
   }
 
-  // 获取设备唯一标识
-  static Future<String> getDeviceId() async {
-    try {
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        return androidInfo.id;
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        return iosInfo.identifierForVendor ?? 'unknown_ios_id';
-      } else {
-        return 'unknown_platform';
-      }
-    } catch (e) {
-      return 'error_getting_device_id';
-    }
-  }
+  // // 获取设备唯一标识
+  // static Future<String> getDeviceId() async {
+  //   try {
+  //     if (Platform.isAndroid) {
+  //       AndroidDeviceInfo androidInfo = await requiresDeviceInfo().androidInfo;
+  //       return androidInfo.id;
+  //     } else if (Platform.isIOS) {
+  //       IosDeviceInfo iosInfo = await requiresDeviceInfo().iosInfo;
+  //       return iosInfo.identifierForVendor ?? 'unknown_ios_id';
+  //     } else {
+  //       return 'unknown_platform';
+  //     }
+  //   } catch (e) {
+  //     return 'error_getting_device_id';
+  //   }
+  // }
 }

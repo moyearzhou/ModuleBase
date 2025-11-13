@@ -18,7 +18,7 @@ description: "ZotPaper公共基类"
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.5.4
+  sdk: '>=3.4.0'
 
 dependencies:
   flutter:
@@ -106,10 +106,10 @@ dependencies:
   supabase_flutter: ^2.10.3
 
   # device_info
-  device_info_plus: ^11.3.0
+  device_info_plus: ^11.1.0
 
   # package_info
-  package_info_plus: ^4.1.0
+  package_info_plus: ^8.1.0
 
   # connectivity
   connectivity_plus: ^5.0.0
@@ -122,6 +122,8 @@ dependencies:
     path: /Users/moyearzhou/StudioProjects/webdav_client2
 #    git:
 #      url: git@github.com:moyearzhou/webdav_client2.git
+
+  open_filex: ^4.5.0
 
 dev_dependencies:
   flutter_test:

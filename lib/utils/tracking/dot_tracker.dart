@@ -1,59 +1,56 @@
+
 import 'dart:io';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+
 import 'package:flutter/material.dart';
-import 'package:module_base/utils/device/device_utils.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../device/device_info_helper.dart';
+import '../device/device_utils.dart';
+import '../log/app_log_event.dart';
 import '../user/app_user_helper.dart';
 
-final supabase = Supabase.instance.client;
+class DotTracker {
 
+  final String eventName;
 
-Map<String, dynamic>? appInfo;
+  final String eventDescription;
 
-enum LogLevel {
-  info,
-  warning,
-  error,
-  fatal,
-  debug;
+  Map<String, dynamic>? eventProperties = null;
 
-  String toLevel() {
-    switch (this) {
-      case LogLevel.info:
-        return "info";
-      case LogLevel.warning:
-        return "warning";
-      case LogLevel.error:
-        return "error";
-      case LogLevel.debug:
-        return "debug";
-      case LogLevel.fatal:
-        return "fatal";
-      default:
-        return "info";
-    }
+  DotTracker({
+    required this.eventName,
+    this.eventDescription = "",
+    this.eventProperties
+  });
+
+  static DotTracker addBot(eventName, {description = "", Map<String, dynamic>? properties}) {
+    return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
+  }
+  
+  static DotTracker addDot(eventName, {description = "", Map<String, dynamic>? properties}) {
+    return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
+  }
+
+  DotTracker addParam(String key, dynamic value) {
+    eventProperties ??= {};
+    eventProperties![key] = value;
+    return this;
+  }
+
+  Future report() async {
+    return reportDotEvent(
+        eventName: eventName,
+        eventDescription: eventDescription,
+        eventProperties: eventProperties
+    );
   }
 }
 
-Connectivity requiresConnectivity() {
-  final Connectivity connectivity = Connectivity();
-  return connectivity;
-}
-
-DeviceInfoPlugin requiresDeviceInfo() {
-  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  return deviceInfo;
-}
-
-Future<void> logEvent({
-  LogLevel logLevel = LogLevel.info,
-  String? stackTrace,
-  required String message,
+Future<void> reportDotEvent({
+  required String eventName,
+  String eventDescription = "",
+  Map<String, dynamic>? eventProperties,
 }) async {
-  debugPrint("Supabase 记录日志： $message");
+  debugPrint("Supabase 埋点上报： $eventName");
 
   try {
     var infoMap = await DeviceService.getDeviceInfo();
@@ -83,10 +80,14 @@ Future<void> logEvent({
     }
 
     await supabase
-        .from('zotpaper_logs')
+        .from('tracking_events')
         .insert({
-      'level': logLevel.toLevel(),
-      'message': message,
+      'event_name': eventName,
+      'event_description': eventDescription,
+      'event_properties': eventProperties,
+      'platform': Platform.operatingSystem,
+      'app_version': appInfo?['fullVersion'],
+      'uuid': uuid,
       'device_info': {
         'os': Platform.operatingSystem,
         'os_version': osVersion,
@@ -113,34 +114,10 @@ Future<void> logEvent({
         'version_name': appInfo?['fullVersion'],
         'version_code': appInfo?['buildNumber'],
       },
-      'stack_trace': stackTrace,
-      'platform': Platform.operatingSystem,
-      'additional_data': {
-        'dart_version': Platform.version,
-      },
     });
   } catch (e) {
-    debugPrint("Supabase 错误： $e");
+    debugPrint("Supabase 埋点上报 错误： $e");
     rethrow;
   }
 
-}
-
-String parserNetworkType(ConnectivityResult connectivityResult) {
-  switch (connectivityResult) {
-    case ConnectivityResult.wifi:
-      return 'wifi';
-    case ConnectivityResult.mobile:
-      return 'cellular';
-    case ConnectivityResult.ethernet:
-      return 'ethernet';
-    case ConnectivityResult.vpn:
-      return 'vpn';
-    case ConnectivityResult.bluetooth:
-      return 'bluetooth';
-    case ConnectivityResult.other:
-      return 'other';
-    default:
-      return 'offline';
-  }
 }
