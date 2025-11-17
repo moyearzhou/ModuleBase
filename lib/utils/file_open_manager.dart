@@ -19,7 +19,8 @@ class FileOpenManager {
       if (_harmonFileOpener == null) {
         return OpenRes(type: ResultEnum.noAppToOpen, message: "no app to open");
       } else {
-        await _harmonFileOpener?.call(path) ?? OpenRes(type: ResultEnum.error, message: "error to open: $path");
+        var res = await _harmonFileOpener?.call(path);
+        return res ?? OpenRes(type: ResultEnum.error, message: "error to open: $path");
       }
 
     } else {
@@ -29,8 +30,7 @@ class FileOpenManager {
       );
       return OpenRes(type: OpenRes.convertJson(result.type.index), message: result.message);
     }
-
-    return OpenRes(type: ResultEnum.error, message: "error to open: $path");
+    // return OpenRes(type: ResultEnum.error, message: "error to open: $path");
   }
 }
 
@@ -51,8 +51,8 @@ class OpenRes {
   OpenRes({this.type = ResultEnum.done, this.message = "done"});
 
   OpenRes.fromJson(Map<String, dynamic> json)
-      : message = json['message'],
-        type = convertJson(json['type']);
+      : message = json['message'].toString(),
+        type = convertJson(json['type'] ?? -4);
 
   static ResultEnum convertJson(int? jsonType) {
     switch (jsonType) {
