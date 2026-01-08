@@ -16,11 +16,17 @@ class DotTracker {
 
   Map<String, dynamic>? eventProperties = null;
 
+  static Map<String, dynamic> _commonProperties = {};
+
   DotTracker({
     required this.eventName,
     this.eventDescription = "",
     this.eventProperties
   });
+
+  static addCommonParam(String key, dynamic value) {
+    _commonProperties[key] = value;
+  }
 
   static DotTracker addBot(eventName, {description = "", Map<String, dynamic>? properties}) {
     return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
@@ -79,35 +85,59 @@ Future<void> reportDotEvent({
       deviceType = "Tablet";
     }
 
+    // 读取通用属性
+    final commonProps = DotTracker._commonProperties;
+    
+    // 合并 user_info
+    final userInfo = <String, dynamic>{
+      'unique_id': uuid,
+    };
+    if (commonProps['user_info'] is Map) {
+      userInfo.addAll(Map<String, dynamic>.from(commonProps['user_info']));
+    }
+    
+    // 合并 device_info
+    final deviceInfo = <String, dynamic>{
+      'os': Platform.operatingSystem,
+      'os_version': osVersion,
+      'device_name': deviceName,
+      'brand': brand,
+      'model': model,
+      'product': product,
+      'hardware': hardware,
+      'manufacturer': manufacturer,
+      'sdkInt': sdkInt,
+      'base_OS': baseOS,
+      'device_type': deviceType,
+    };
+    if (commonProps['device_info'] is Map) {
+      deviceInfo.addAll(Map<String, dynamic>.from(commonProps['device_info']));
+    }
+    
+    // 合并 event_properties
+    final mergedEventProperties = <String, dynamic>{};
+    if (eventProperties != null) {
+      mergedEventProperties.addAll(eventProperties);
+    }
+    if (commonProps['event_properties'] is Map) {
+      mergedEventProperties.addAll(Map<String, dynamic>.from(commonProps['event_properties']));
+    }
+
     await supabase
         .from('tracking_events')
         .insert({
       'event_name': eventName,
       'event_description': eventDescription,
-      'event_properties': eventProperties,
+      'event_properties': mergedEventProperties.isNotEmpty ? mergedEventProperties : null,
       'platform': Platform.operatingSystem,
       'app_version': appInfo?['fullVersion'],
       'uuid': uuid,
-      'device_info': {
-        'os': Platform.operatingSystem,
-        'os_version': osVersion,
-        'device_name': deviceName,
-        'brand': brand,
-        'model': model,
-        'product': product,
-        'hardware': hardware,
-        'manufacturer': manufacturer,
-        'sdkInt': sdkInt,
-        'base_OS': baseOS,
-        'device_type': deviceType,
-      },
+      'device_info': deviceInfo,
       // 'user_id': '', // 如果有的话
       'network_info': {
         'network_type': networkType,
       },
-      'user_info': {
-        'unique_id': uuid,
-      },
+      'user_info': userInfo,
       'app_info': {
         'app_name': appInfo?['appName'],
         'package_name': appInfo?['packageName'],
@@ -119,5 +149,4 @@ Future<void> reportDotEvent({
     debugPrint("Supabase 埋点上报 错误： $e");
     rethrow;
   }
-
 }
