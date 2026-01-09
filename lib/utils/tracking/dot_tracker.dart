@@ -27,10 +27,6 @@ class DotTracker {
   static addCommonParam(String key, dynamic value) {
     _commonProperties[key] = value;
   }
-
-  static DotTracker addBot(eventName, {description = "", Map<String, dynamic>? properties}) {
-    return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
-  }
   
   static DotTracker addDot(eventName, {description = "", Map<String, dynamic>? properties}) {
     return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
