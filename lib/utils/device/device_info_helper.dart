@@ -68,10 +68,19 @@ class DeviceService {
 
     return {
       'platform': 'ios',
+      'brand': 'Apple',
       'model': iosInfo.model,
       'name': iosInfo.name,
       'systemName': iosInfo.systemName,
       'systemVersion': iosInfo.systemVersion,
+      'device': iosInfo.modelName,
+      'product': iosInfo.modelName,
+      'hardware': iosInfo.utsname.machine,
+      'manufacturer': iosInfo.utsname.machine,
+      'version': {
+        'sdkInt': iosInfo.systemVersion,
+        'release': iosInfo.utsname.release,
+      },
       'utsname': {
         'sysname': iosInfo.utsname.sysname,
         'nodename': iosInfo.utsname.nodename,

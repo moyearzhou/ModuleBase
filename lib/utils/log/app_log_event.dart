@@ -57,17 +57,28 @@ Future<void> logEvent({
 
   try {
     var infoMap = await DeviceService.getDeviceInfo();
-    String brand = infoMap['brand']?? "";
-    String product = infoMap['product']?? "";
-    String model = infoMap['model']?? "";
-    String deviceName = infoMap['deviceName']?? "";
+    String brand = infoMap['brand'] ?? "";
+    String product = infoMap['product'] ?? "";
+    String model = infoMap['model'] ?? "";
+    String deviceName = infoMap['device'] ?? "";
 
-    String hardware = infoMap['hardware']?? "";
-    String manufacturer = infoMap['manufacturer']?? "";
-    String sdkInt = infoMap['version']['sdkInt'].toString() ?? "";
-    String baseOS = infoMap['version']['baseOS'] ?? "";
+    String hardware = infoMap['hardware'] ?? "";
+    String manufacturer = infoMap['manufacturer'] ?? "";
 
-    String osVersion = infoMap['version']['osVersion'] ?? "";
+    String sdkInt = "";
+    String baseOS = "";
+    String osVersion = "";
+
+    var versionInfo = infoMap['version'];
+    if (versionInfo != null) {
+      sdkInt = versionInfo['sdkInt']?.toString() ?? "";
+      baseOS = versionInfo['baseOS'] ?? "";
+      // Android 用 'release'，iOS 用顶层的 'systemVersion'
+      osVersion = versionInfo['release'] ?? infoMap['systemVersion'] ?? "";
+    } else {
+      // iOS 的 systemVersion 在顶层
+      osVersion = infoMap['systemVersion'] ?? "";
+    }
 
     appInfo ??= await DeviceService.getAppInfo();
 
@@ -120,8 +131,8 @@ Future<void> logEvent({
       },
     });
   } catch (e) {
-    debugPrint("Supabase 错误： $e");
-    rethrow;
+    debugPrint("Supabase 日志记录错误： $e");
+    // 日志记录失败不应影响正常业务流程，不再向上抛出异常
   }
 
 }
