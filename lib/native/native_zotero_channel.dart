@@ -33,4 +33,20 @@ class ZoteroChannel {
     }
   }
 
+  static Future<String> getAppChannel() async {
+    String channelName = "";
+    try {
+      final String result = await _channel.invokeMethod('getAppChannel');
+      channelName = result;
+    } catch (e) {
+      String? msg = e.toString();
+      if (e is PlatformException) {
+        msg = e.message;
+      }
+      debugPrint("Failed to get app channel: $msg.");
+    }
+    return channelName;
+  }
+
+
 }
