@@ -9,6 +9,8 @@ import '../device/device_utils.dart';
 import '../log/app_log_event.dart';
 import '../user/app_user_helper.dart';
 
+const String APP_INFO = "app_info";
+
 class DotTracker {
 
   final String eventName;
@@ -121,7 +123,7 @@ Future<void> reportDotEvent({
     if (commonProps['device_info'] is Map) {
       deviceInfo.addAll(Map<String, dynamic>.from(commonProps['device_info']));
     }
-    
+
     // 合并 event_properties
     final mergedEventProperties = <String, dynamic>{};
     if (eventProperties != null) {
@@ -130,6 +132,8 @@ Future<void> reportDotEvent({
     if (commonProps['event_properties'] is Map) {
       mergedEventProperties.addAll(Map<String, dynamic>.from(commonProps['event_properties']));
     }
+
+    final appInfoMap = _getAppInfoMap();
 
     await supabase
         .from('tracking_events')
@@ -146,15 +150,25 @@ Future<void> reportDotEvent({
         'network_type': networkType,
       },
       'user_info': userInfo,
-      'app_info': {
-        'app_name': appInfo?['appName'],
-        'package_name': appInfo?['packageName'],
-        'version_name': appInfo?['fullVersion'],
-        'version_code': appInfo?['buildNumber'],
-      },
+      'app_info': appInfoMap,
     });
   } catch (e) {
     debugPrint("Supabase 埋点上报 错误： $e");
     // 埋点上报失败不应影响正常业务流程，不再向上抛出异常
   }
+
+}
+
+Map<String, dynamic> _getAppInfoMap() {
+  final appInfMap = <String, dynamic >{
+    'app_name': appInfo?['appName'],
+    'package_name': appInfo?['packageName'],
+    'version_name': appInfo?['fullVersion'],
+    'version_code': appInfo?['buildNumber'],
+  };
+  final commonProps = DotTracker._commonProperties;
+  if (commonProps[APP_INFO] is Map) {
+    appInfMap.addAll(Map<String, dynamic>.from(commonProps['app_info']));
+  }
+  return appInfMap;
 }
