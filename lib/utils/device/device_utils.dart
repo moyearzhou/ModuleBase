@@ -49,6 +49,27 @@ class DeviceUtils {
     // 对于其他平台，我们也可以使用屏幕尺寸判断
     return mediaQuery.size.shortestSide > 600;
   }
+
+  /// 获取设备类型
+  static Future<String> getDeviceType() async {
+    if (Platform.isMacOS) {
+      return "MacOS";
+    } else if (Platform.isLinux) {
+      return "Linux";
+    } else if (Platform.isWindows) {
+      return "Windows";
+    } else if (Platform.isFuchsia) {
+      return "Fuchsia";
+    }
+
+    var deviceType = "Phone";
+    var isTablet = await DeviceUtils.isTabletDevice();
+    if (isTablet) {
+      deviceType = "Tablet";
+    }
+
+    return deviceType;
+  }
 }
 
 /// 判断是否为华为鸿蒙系统

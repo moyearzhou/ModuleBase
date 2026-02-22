@@ -22,6 +22,8 @@ class DeviceService {
         return await _getIOSDeviceInfo();
       } else if (Platform.operatingSystem == "ohos") {
         return await _getHarmonyDeviceInfo();
+      } else if (Platform.isMacOS) {
+        return await _getMacOSDeviceInfo();
       } else {
         return _getBasicDeviceInfo();
       }
@@ -93,6 +95,37 @@ class DeviceService {
     };
   }
 
+  static Future<Map<String, dynamic>> _getMacOSDeviceInfo() async {
+    MacOsDeviceInfo macosInfo = await requiresDeviceInfo().macOsInfo;
+
+    return {
+      'platform': Platform.operatingSystem,
+      'brand': 'Apple',
+      'model': macosInfo.model,
+      'name': macosInfo.modelName,
+      'systemName': macosInfo.systemGUID,
+      'systemVersion': macosInfo.majorVersion,
+      'device': macosInfo.modelName,
+      'product': macosInfo.modelName,
+      'hardware': macosInfo.hostName,
+      'manufacturer': "Apple",
+      'version': {
+        'sdkInt': macosInfo.majorVersion,
+        'release': macosInfo.osRelease,
+      },
+      'utsname': {
+        'sysname': macosInfo.computerName,
+        'nodename': "",
+        'release': macosInfo.osRelease,
+        'version': macosInfo.majorVersion,
+        'machine': macosInfo.model,
+      },
+      'isPhysicalDevice': "true",
+      'identifierForVendor': "",
+    };
+  }
+
+
   static void registerHarmonyDeviceInfoHook(Future<Map<String, dynamic>> method) async {
     _harmonyDeviceInfoHook = method;
   }
@@ -104,10 +137,26 @@ class DeviceService {
 
   // 基础设备信息（备用）
   static Map<String, dynamic> _getBasicDeviceInfo() {
+    var versionInfo = {
+      'version': Platform.operatingSystemVersion,
+      'sdkInt': Platform.version.toString(),
+      'release': "",
+      'codename': "",
+      'baseOS': Platform.operatingSystem,
+    };
     return {
       'platform': Platform.operatingSystem,
-      'version': Platform.operatingSystemVersion,
+      'version': versionInfo,
       'localHostname': Platform.localHostname,
+      'brand': '',
+      'model': "",
+      'name': "",
+      'systemName': "",
+      'systemVersion': "",
+      'device': "",
+      'product': "",
+      'hardware': "",
+      'manufacturer': "",
     };
   }
 
