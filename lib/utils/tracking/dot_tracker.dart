@@ -1,9 +1,5 @@
-
 import 'dart:io';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-
 import '../device/device_info_helper.dart';
 import '../device/device_utils.dart';
 import '../log/app_log_event.dart';
@@ -88,12 +84,7 @@ Future<void> reportDotEvent({
     var networkType = parserNetworkType(connectivityResult);
 
     final uuid = await AppUserHelper.getUUID();
-
-    var deviceType = "Phone";
-    var isTablet = await DeviceUtils.isTabletDevice();
-    if (isTablet) {
-      deviceType = "Tablet";
-    }
+    var deviceType = await DeviceUtils.getDeviceType();
 
     // 读取通用属性
     final commonProps = DotTracker._commonProperties;
@@ -152,8 +143,8 @@ Future<void> reportDotEvent({
       'user_info': userInfo,
       'app_info': appInfoMap,
     });
-  } catch (e) {
-    debugPrint("Supabase 埋点上报 错误： $e");
+  } catch (e, stackTrace) {
+    debugPrint("Supabase report event failed： $e , stackTrace: $stackTrace");
     // 埋点上报失败不应影响正常业务流程，不再向上抛出异常
   }
 
