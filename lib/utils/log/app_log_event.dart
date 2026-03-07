@@ -1,17 +1,7 @@
 import 'dart:io';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:module_base/utils/device/device_utils.dart';
+import 'package:module_base/global/global_params.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../device/device_info_helper.dart';
-import '../user/app_user_helper.dart';
-
-final supabase = Supabase.instance.client;
-
-
-Map<String, dynamic>? appInfo;
 
 enum LogLevel {
   info,
@@ -38,120 +28,46 @@ enum LogLevel {
   }
 }
 
-Connectivity requiresConnectivity() {
-  final Connectivity connectivity = Connectivity();
-  return connectivity;
-}
-
-DeviceInfoPlugin requiresDeviceInfo() {
-  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  return deviceInfo;
-}
-
 Future<void> logEvent({
   LogLevel logLevel = LogLevel.info,
   String? stackTrace,
+  Map<String, dynamic>? params,
   required String message,
 }) async {
-  debugPrint("Supabase 记录日志： $message");
+  debugPrint("Supabase logEvent： $message");
 
   try {
-    var infoMap = await DeviceService.getDeviceInfo();
-    String brand = infoMap['brand'] ?? "";
-    String product = infoMap['product'] ?? "";
-    String model = infoMap['model'] ?? "";
-    String deviceName = infoMap['device'] ?? "";
+    // 用户信息
+    final userInfo = await GlobalReportParams.getUserInfoMap();
 
-    String hardware = infoMap['hardware'] ?? "";
-    String manufacturer = infoMap['manufacturer'] ?? "";
+    // 合并 device_info
+    final deviceInfo = await GlobalReportParams.getDeviceInfoMap();
 
-    String sdkInt = "";
-    String baseOS = "";
-    String osVersion = "";
+    // app信息
+    final appInfoMap = await GlobalReportParams.getAppInfoMap();
 
-    var versionInfo = infoMap['version'];
-    if (versionInfo != null) {
-      sdkInt = versionInfo['sdkInt']?.toString() ?? "";
-      baseOS = versionInfo['baseOS'] ?? "";
-      // Android 用 'release'，iOS 用顶层的 'systemVersion'
-      osVersion = versionInfo['release'] ?? infoMap['systemVersion'] ?? "";
-    } else {
-      // iOS 的 systemVersion 在顶层
-      osVersion = infoMap['systemVersion'] ?? "";
-    }
+    // 网络信息
+    final netWorkInfoMap = await GlobalReportParams.getNetWorkInfoMap();
 
-    appInfo ??= await DeviceService.getAppInfo();
+    var additionalData = params ?? {};
 
-    var connectivityResult = await requiresConnectivity().checkConnectivity();
-    var networkType = parserNetworkType(connectivityResult);
-
-    final uuid = await AppUserHelper.getUUID();
-
-    var deviceType = "Phone";
-    var isTablet = await DeviceUtils.isTabletDevice();
-    if (isTablet) {
-      deviceType = "Tablet";
-    }
-
-    await supabase
+    await Supabase.instance.client
         .from('zotpaper_logs')
         .insert({
       'level': logLevel.toLevel(),
       'message': message,
-      'device_info': {
-        'os': Platform.operatingSystem,
-        'os_version': osVersion,
-        'device_name': deviceName,
-        'brand': brand,
-        'model': model,
-        'product': product,
-        'hardware': hardware,
-        'manufacturer': manufacturer,
-        'sdkInt': sdkInt,
-        'base_OS': baseOS,
-        'device_type': deviceType,
-      },
+      'device_info': deviceInfo,
       // 'user_id': '', // 如果有的话
-      'network_info': {
-        'network_type': networkType,
-      },
-      'user_info': {
-        'unique_id': uuid,
-      },
-      'app_info': {
-        'app_name': appInfo?['appName'],
-        'package_name': appInfo?['packageName'],
-        'version_name': appInfo?['fullVersion'],
-        'version_code': appInfo?['buildNumber'],
-      },
+      'network_info': netWorkInfoMap,
+      'user_info': userInfo,
+      'app_info': appInfoMap,
       'stack_trace': stackTrace,
       'platform': Platform.operatingSystem,
-      'additional_data': {
-        'dart_version': Platform.version,
-      },
+      'additional_data': additionalData,
     });
   } catch (e) {
-    debugPrint("Supabase 日志记录错误： $e");
+    debugPrint("Supabase logEvent error： $e");
     // 日志记录失败不应影响正常业务流程，不再向上抛出异常
   }
 
-}
-
-String parserNetworkType(ConnectivityResult connectivityResult) {
-  switch (connectivityResult) {
-    case ConnectivityResult.wifi:
-      return 'wifi';
-    case ConnectivityResult.mobile:
-      return 'cellular';
-    case ConnectivityResult.ethernet:
-      return 'ethernet';
-    case ConnectivityResult.vpn:
-      return 'vpn';
-    case ConnectivityResult.bluetooth:
-      return 'bluetooth';
-    case ConnectivityResult.other:
-      return 'other';
-    default:
-      return 'offline';
-  }
 }

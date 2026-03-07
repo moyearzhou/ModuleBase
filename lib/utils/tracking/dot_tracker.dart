@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../device/device_info_helper.dart';
-import '../device/device_utils.dart';
-import '../log/app_log_event.dart';
+import 'package:module_base/global/global_params.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../user/app_user_helper.dart';
 
 const String APP_INFO = "app_info";
@@ -13,35 +12,32 @@ class DotTracker {
 
   final String eventDescription;
 
-  Map<String, dynamic>? eventProperties = null;
-
-  static Map<String, dynamic> _commonProperties = {};
+  Map<String, dynamic>? _eventProperties = null;
 
   DotTracker({
     required this.eventName,
     this.eventDescription = "",
-    this.eventProperties
-  });
+    Map<String, dynamic>? eventProperties
+  }):  _eventProperties = eventProperties;
 
-  static addCommonParam(String key, dynamic value) {
-    _commonProperties[key] = value;
-  }
-  
+  /// 创建埋点
   static DotTracker addDot(eventName, {description = "", Map<String, dynamic>? properties}) {
     return DotTracker(eventName: eventName, eventDescription: description, eventProperties: properties);
   }
 
+  /// 添加埋点参数
   DotTracker addParam(String key, dynamic value) {
-    eventProperties ??= {};
-    eventProperties![key] = value;
+    _eventProperties ??= {};
+    _eventProperties![key] = value;
     return this;
   }
 
-  Future report() async {
+  /// 上报埋点
+  Future<void> report() async {
     return reportDotEvent(
         eventName: eventName,
         eventDescription: eventDescription,
-        eventProperties: eventProperties
+        eventProperties: _eventProperties
     );
   }
 }
@@ -51,69 +47,25 @@ Future<void> reportDotEvent({
   String eventDescription = "",
   Map<String, dynamic>? eventProperties,
 }) async {
-  debugPrint("Supabase 埋点上报： $eventName");
+  debugPrint("Supabase trackEvent： $eventName");
 
   try {
-    var infoMap = await DeviceService.getDeviceInfo();
-    String brand = infoMap['brand'] ?? "";
-    String product = infoMap['product'] ?? "";
-    String model = infoMap['model'] ?? "";
-    String deviceName = infoMap['device'] ?? "";
-
-    String hardware = infoMap['hardware'] ?? "";
-    String manufacturer = infoMap['manufacturer'] ?? "";
-
-    String sdkInt = "";
-    String baseOS = "";
-    String osVersion = "";
-
-    var versionInfo = infoMap['version'];
-    if (versionInfo != null) {
-      sdkInt = versionInfo['sdkInt']?.toString() ?? "";
-      baseOS = versionInfo['baseOS'] ?? "";
-      // Android 用 'release'，iOS 用顶层的 'systemVersion'
-      osVersion = versionInfo['release'] ?? infoMap['systemVersion'] ?? "";
-    } else {
-      // iOS 的 systemVersion 在顶层
-      osVersion = infoMap['systemVersion'] ?? "";
-    }
-
-    appInfo ??= await DeviceService.getAppInfo();
-
-    var connectivityResult = await requiresConnectivity().checkConnectivity();
-    var networkType = parserNetworkType(connectivityResult);
-
     final uuid = await AppUserHelper.getUUID();
-    var deviceType = await DeviceUtils.getDeviceType();
 
-    // 读取通用属性
-    final commonProps = DotTracker._commonProperties;
+    // 通用属性
+    final commonProps = GlobalReportParams.getCommonParams();
     
-    // 合并 user_info
-    final userInfo = <String, dynamic>{
-      'unique_id': uuid,
-    };
-    if (commonProps['user_info'] is Map) {
-      userInfo.addAll(Map<String, dynamic>.from(commonProps['user_info']));
-    }
+    // 用户信息
+    final userInfo = await GlobalReportParams.getUserInfoMap();
     
     // 合并 device_info
-    final deviceInfo = <String, dynamic>{
-      'os': Platform.operatingSystem,
-      'os_version': osVersion,
-      'device_name': deviceName,
-      'brand': brand,
-      'model': model,
-      'product': product,
-      'hardware': hardware,
-      'manufacturer': manufacturer,
-      'sdkInt': sdkInt,
-      'base_OS': baseOS,
-      'device_type': deviceType,
-    };
-    if (commonProps['device_info'] is Map) {
-      deviceInfo.addAll(Map<String, dynamic>.from(commonProps['device_info']));
-    }
+    final deviceInfo = await GlobalReportParams.getDeviceInfoMap();
+
+    // app信息
+    final appInfoMap = await GlobalReportParams.getAppInfoMap();
+
+    // 网络信息
+    final netWorkInfoMap = await GlobalReportParams.getNetWorkInfoMap();
 
     // 合并 event_properties
     final mergedEventProperties = <String, dynamic>{};
@@ -124,42 +76,23 @@ Future<void> reportDotEvent({
       mergedEventProperties.addAll(Map<String, dynamic>.from(commonProps['event_properties']));
     }
 
-    final appInfoMap = _getAppInfoMap();
-
-    await supabase
+    await Supabase.instance.client
         .from('tracking_events')
         .insert({
       'event_name': eventName,
       'event_description': eventDescription,
       'event_properties': mergedEventProperties.isNotEmpty ? mergedEventProperties : null,
       'platform': Platform.operatingSystem,
-      'app_version': appInfo?['fullVersion'],
+      'app_version': appInfoMap['version_name'],
       'uuid': uuid,
       'device_info': deviceInfo,
       // 'user_id': '', // 如果有的话
-      'network_info': {
-        'network_type': networkType,
-      },
+      'network_info': netWorkInfoMap,
       'user_info': userInfo,
       'app_info': appInfoMap,
     });
   } catch (e, stackTrace) {
-    debugPrint("Supabase report event failed： $e , stackTrace: $stackTrace");
+    debugPrint("Supabase track event failed： $e , stackTrace: $stackTrace");
     // 埋点上报失败不应影响正常业务流程，不再向上抛出异常
   }
-
-}
-
-Map<String, dynamic> _getAppInfoMap() {
-  final appInfMap = <String, dynamic >{
-    'app_name': appInfo?['appName'],
-    'package_name': appInfo?['packageName'],
-    'version_name': appInfo?['fullVersion'],
-    'version_code': appInfo?['buildNumber'],
-  };
-  final commonProps = DotTracker._commonProperties;
-  if (commonProps[APP_INFO] is Map) {
-    appInfMap.addAll(Map<String, dynamic>.from(commonProps['app_info']));
-  }
-  return appInfMap;
 }
