@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,43 @@ class DeviceUtils {
     }
 
     return deviceType;
+  }
+
+  static Connectivity requiresConnectivity() {
+    final Connectivity connectivity = Connectivity();
+    return connectivity;
+  }
+
+  static DeviceInfoPlugin requiresDeviceInfo() {
+    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    return deviceInfo;
+  }
+
+  static String parserNetworkType(ConnectivityResult connectivityResult) {
+    switch (connectivityResult) {
+      case ConnectivityResult.wifi:
+        return 'wifi';
+      case ConnectivityResult.mobile:
+        return 'cellular';
+      case ConnectivityResult.ethernet:
+        return 'ethernet';
+      case ConnectivityResult.vpn:
+        return 'vpn';
+      case ConnectivityResult.bluetooth:
+        return 'bluetooth';
+      case ConnectivityResult.other:
+        return 'other';
+      default:
+        return 'offline';
+    }
+  }
+
+  /// 获取当前网络类型
+  static Future<String> getCurrentNetworkType() async {
+    var connectivityResult = await DeviceUtils.requiresConnectivity().checkConnectivity();
+    var networkType = DeviceUtils.parserNetworkType(connectivityResult);
+
+    return networkType;
   }
 }
 

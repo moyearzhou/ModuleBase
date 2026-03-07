@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:module_base/utils/log/app_log_event.dart';
+import 'package:module_base/utils/device/device_utils.dart';
 import 'app_info_service.dart';
 
 class DeviceService {
@@ -34,7 +34,7 @@ class DeviceService {
 
   // 获取 Android 设备信息
   static Future<Map<String, dynamic>> _getAndroidDeviceInfo() async {
-    AndroidDeviceInfo androidInfo = await requiresDeviceInfo().androidInfo;
+    AndroidDeviceInfo androidInfo = await DeviceUtils.requiresDeviceInfo().androidInfo;
 
     return {
       'platform': 'android',
@@ -66,7 +66,7 @@ class DeviceService {
 
   // 获取 iOS 设备信息
   static Future<Map<String, dynamic>> _getIOSDeviceInfo() async {
-    IosDeviceInfo iosInfo = await requiresDeviceInfo().iosInfo;
+    IosDeviceInfo iosInfo = await DeviceUtils.requiresDeviceInfo().iosInfo;
 
     return {
       'platform': 'ios',
@@ -96,7 +96,7 @@ class DeviceService {
   }
 
   static Future<Map<String, dynamic>> _getMacOSDeviceInfo() async {
-    MacOsDeviceInfo macosInfo = await requiresDeviceInfo().macOsInfo;
+    MacOsDeviceInfo macosInfo = await DeviceUtils.requiresDeviceInfo().macOsInfo;
 
     return {
       'platform': Platform.operatingSystem,
@@ -186,7 +186,7 @@ class DeviceService {
   // 获取网络类型
   static Future<String> getNetworkType() async {
     try {
-      var connectivityResult = await requiresConnectivity().checkConnectivity();
+      var connectivityResult = await DeviceUtils.requiresConnectivity().checkConnectivity();
 
       switch (connectivityResult) {
         case ConnectivityResult.wifi:
@@ -211,7 +211,7 @@ class DeviceService {
 
   // 监听网络状态变化
   static Stream<String> get onNetworkStateChanged {
-    return requiresConnectivity().onConnectivityChanged.map((result) {
+    return DeviceUtils.requiresConnectivity().onConnectivityChanged.map((result) {
       switch (result) {
         case ConnectivityResult.wifi:
           return 'wifi';
