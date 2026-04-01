@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:module_base/utils/log/app_log_event.dart';
+import 'package:module_base/utils/device/device_utils.dart';
 import 'app_info_service.dart';
 
 class DeviceService {
@@ -22,6 +22,8 @@ class DeviceService {
         return await _getIOSDeviceInfo();
       } else if (Platform.operatingSystem == "ohos") {
         return await _getHarmonyDeviceInfo();
+      } else if (Platform.isMacOS) {
+        return await _getMacOSDeviceInfo();
       } else {
         return _getBasicDeviceInfo();
       }
@@ -32,7 +34,7 @@ class DeviceService {
 
   // 获取 Android 设备信息
   static Future<Map<String, dynamic>> _getAndroidDeviceInfo() async {
-    AndroidDeviceInfo androidInfo = await requiresDeviceInfo().androidInfo;
+    AndroidDeviceInfo androidInfo = await DeviceUtils.requiresDeviceInfo().androidInfo;
 
     return {
       'platform': 'android',
@@ -64,14 +66,23 @@ class DeviceService {
 
   // 获取 iOS 设备信息
   static Future<Map<String, dynamic>> _getIOSDeviceInfo() async {
-    IosDeviceInfo iosInfo = await requiresDeviceInfo().iosInfo;
+    IosDeviceInfo iosInfo = await DeviceUtils.requiresDeviceInfo().iosInfo;
 
     return {
       'platform': 'ios',
+      'brand': 'Apple',
       'model': iosInfo.model,
       'name': iosInfo.name,
       'systemName': iosInfo.systemName,
       'systemVersion': iosInfo.systemVersion,
+      'device': iosInfo.modelName,
+      'product': iosInfo.modelName,
+      'hardware': iosInfo.utsname.machine,
+      'manufacturer': iosInfo.utsname.machine,
+      'version': {
+        'sdkInt': iosInfo.systemVersion,
+        'release': iosInfo.utsname.release,
+      },
       'utsname': {
         'sysname': iosInfo.utsname.sysname,
         'nodename': iosInfo.utsname.nodename,
@@ -84,6 +95,37 @@ class DeviceService {
     };
   }
 
+  static Future<Map<String, dynamic>> _getMacOSDeviceInfo() async {
+    MacOsDeviceInfo macosInfo = await DeviceUtils.requiresDeviceInfo().macOsInfo;
+
+    return {
+      'platform': Platform.operatingSystem,
+      'brand': 'Apple',
+      'model': macosInfo.model,
+      'name': macosInfo.modelName,
+      'systemName': macosInfo.systemGUID,
+      'systemVersion': macosInfo.majorVersion,
+      'device': macosInfo.modelName,
+      'product': macosInfo.modelName,
+      'hardware': macosInfo.hostName,
+      'manufacturer': "Apple",
+      'version': {
+        'sdkInt': macosInfo.majorVersion,
+        'release': macosInfo.osRelease,
+      },
+      'utsname': {
+        'sysname': macosInfo.computerName,
+        'nodename': "",
+        'release': macosInfo.osRelease,
+        'version': macosInfo.majorVersion,
+        'machine': macosInfo.model,
+      },
+      'isPhysicalDevice': "true",
+      'identifierForVendor': "",
+    };
+  }
+
+
   static void registerHarmonyDeviceInfoHook(Future<Map<String, dynamic>> method) async {
     _harmonyDeviceInfoHook = method;
   }
@@ -95,10 +137,26 @@ class DeviceService {
 
   // 基础设备信息（备用）
   static Map<String, dynamic> _getBasicDeviceInfo() {
+    var versionInfo = {
+      'version': Platform.operatingSystemVersion,
+      'sdkInt': Platform.version.toString(),
+      'release': "",
+      'codename': "",
+      'baseOS': Platform.operatingSystem,
+    };
     return {
       'platform': Platform.operatingSystem,
-      'version': Platform.operatingSystemVersion,
+      'version': versionInfo,
       'localHostname': Platform.localHostname,
+      'brand': '',
+      'model': "",
+      'name': "",
+      'systemName': "",
+      'systemVersion': "",
+      'device': "",
+      'product': "",
+      'hardware': "",
+      'manufacturer': "",
     };
   }
 
@@ -128,7 +186,7 @@ class DeviceService {
   // 获取网络类型
   static Future<String> getNetworkType() async {
     try {
-      var connectivityResult = await requiresConnectivity().checkConnectivity();
+      var connectivityResult = await DeviceUtils.requiresConnectivity().checkConnectivity();
 
       switch (connectivityResult) {
         case ConnectivityResult.wifi:
@@ -153,7 +211,7 @@ class DeviceService {
 
   // 监听网络状态变化
   static Stream<String> get onNetworkStateChanged {
-    return requiresConnectivity().onConnectivityChanged.map((result) {
+    return DeviceUtils.requiresConnectivity().onConnectivityChanged.map((result) {
       switch (result) {
         case ConnectivityResult.wifi:
           return 'wifi';
