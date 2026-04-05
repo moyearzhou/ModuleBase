@@ -45,7 +45,7 @@ dependencies:
   # 多语言支持
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: ^0.20.2
 
   #  fl_lib:
   #    path: ../fl_lib
@@ -94,10 +94,10 @@ dependencies:
   # Bruno UI组件库
   #  bruno: ^3.4.3
   bruno:
-    #    path: /Users/moyear/StudioProjects/bruno-moyear
+#    path: /Users/moyearzhou/StudioProjects/bruno-moyear
     git:
       url: https://github.com/moyearzhou/bruno-moyear.git
-  #      ref: v3.4.3
+      ref: feat/pdfEditor
 
   # bugly
   flutter_bugly: ^1.1.0
