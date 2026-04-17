@@ -34,7 +34,7 @@ class AppThemes {
   static final ThemeData darkTheme = ThemeData(
     // brightness: Brightness.dark,
     // primaryColor: Colors.deepPurple, // 主题主色
-    scaffoldBackgroundColor: const Color(0xFF1A2333), // 整体背景颜色
+    scaffoldBackgroundColor: const Color(0xFF1C1C1E), // 整体背景颜色
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
