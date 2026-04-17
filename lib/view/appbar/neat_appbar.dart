@@ -1,5 +1,6 @@
 import 'package:bruno/bruno.dart';
 import 'package:flutter/material.dart';
+import 'package:module_base/ext/common.dart';
 import '../../theme/my_theme.dart';
 
 class ItemMenu {
@@ -71,17 +72,25 @@ PreferredSizeWidget neatAppBar(
 
 
 PreferredSizeWidget simpleAppBar({
+  BuildContext? context,
   String title = "",
   dynamic actions,
 }) {
+  bool isDark = context?.isDark == true;
+  Color? bgColor;
+  if (isDark) {
+    bgColor = AppThemes.darkTheme.scaffoldBackgroundColor;
+  }
+
   return BrnAppBar(
     automaticallyImplyLeading: true,
+    backgroundColor: bgColor,
     leading: BrnBackLeading(
-      child: Icon(Icons.arrow_back_ios_new_outlined, size: 20, color: AppThemes.textMain,),
+      child: Icon(Icons.arrow_back_ios_new_outlined, size: 20, color: isDark ? Colors.white: AppThemes.textMain,),
     ),
     title: Text(
       title,
-      style: TextStyle(fontSize: 16, color: AppThemes.textMain),
+      style: TextStyle(fontSize: 16, color: isDark ? Colors.white: AppThemes.textMain),
     ),
     iconTheme: IconThemeData(
         color: AppThemes.textMain,
