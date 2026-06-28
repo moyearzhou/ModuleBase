@@ -61,12 +61,15 @@ class Telemetry {
 
   Future<void> initializeHiveQueue({
     String boxName = HiveTelemetryQueue.defaultBoxName,
-    String? path,
+    String? queuePath,
   }) async {
     // Hive is opt-in so legacy callers can keep working before the host app has
     // finished storage initialization. Once opened, queued records survive app
     // restarts and keep their original logged_at.
-    _queue = await HiveTelemetryQueue.open(boxName: boxName, path: path);
+    _queue = await HiveTelemetryQueue.open(
+      boxName: boxName,
+      queuePath: queuePath,
+    );
     _resetFlushTimer();
   }
 

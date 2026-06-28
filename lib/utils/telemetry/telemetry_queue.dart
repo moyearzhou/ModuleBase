@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:module_base/files/platform_storage_provider.dart';
 
 import 'telemetry_record.dart';
 
@@ -57,9 +58,10 @@ class HiveTelemetryQueue implements TelemetryQueue {
 
   static Future<HiveTelemetryQueue> open({
     String boxName = defaultBoxName,
-    String? path,
+    String? queuePath,
   }) async {
-    final box = await Hive.openBox(boxName, path: path);
+    final boxPath = queuePath ?? await _defaultQueuePath();
+    final box = await Hive.openBox(boxName, path: boxPath);
     return HiveTelemetryQueue._(box);
   }
 
@@ -97,6 +99,17 @@ class HiveTelemetryQueue implements TelemetryQueue {
   @override
   Future<void> replace(TelemetryRecord record) async {
     await _box.put(record.id, record.toQueueJson());
+  }
+}
+
+Future<String?> _defaultQueuePath() async {
+  // Prefer the platform documents directory when path_provider supports it.
+  // If a target platform/embedding does not provide that directory, let Hive use
+  // its own default location instead of failing initialization.
+  try {
+    return (await PlatformStorageProvider.getStorageDir())?.path;
+  } catch (_) {
+    return null;
   }
 }
 
