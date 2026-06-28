@@ -36,6 +36,12 @@ class TelemetrySanitizer {
     'secret',
     'client_secret',
   };
+  static const Set<String> _queryIdentifierKeys = {
+    'uuid',
+    'unique_id',
+    'user_id',
+    'zotero_id',
+  };
 
   const TelemetrySanitizer();
 
@@ -59,6 +65,9 @@ class TelemetrySanitizer {
         return input.map((item) => visit(item, key)).toList();
       }
       if (input is String) {
+        if (_isQueryIdentifierKey(key)) {
+          return input;
+        }
         return _sanitizeString(input, () => hits++);
       }
       return input;
@@ -80,6 +89,14 @@ class TelemetrySanitizer {
         normalized.contains('cookie') ||
         normalized.contains('authorization') ||
         normalized.contains('secret');
+  }
+
+  bool _isQueryIdentifierKey(String? key) {
+    if (key == null) {
+      return false;
+    }
+    final normalized = key.trim().toLowerCase();
+    return _queryIdentifierKeys.contains(normalized);
   }
 
   String _sanitizeString(String value, void Function() onHit) {
