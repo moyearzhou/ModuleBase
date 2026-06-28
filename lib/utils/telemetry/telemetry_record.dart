@@ -19,6 +19,7 @@ class TelemetryRecord {
   final String? level;
   final String? stackTrace;
   final Map<String, dynamic>? additionalData;
+  final Map<String, dynamic>? networkInfo;
   final DateTime loggedAt;
   final TelemetryPriority priority;
   final int attemptCount;
@@ -37,6 +38,7 @@ class TelemetryRecord {
     this.level,
     this.stackTrace,
     this.additionalData,
+    this.networkInfo,
     this.priority = TelemetryPriority.normal,
     this.attemptCount = 0,
     this.nextRetryAt,
@@ -47,6 +49,7 @@ class TelemetryRecord {
     Map<String, dynamic>? eventProperties,
     String? message,
     Map<String, dynamic>? additionalData,
+    Map<String, dynamic>? networkInfo,
     String? stackTrace,
     int? attemptCount,
     DateTime? nextRetryAt,
@@ -63,6 +66,7 @@ class TelemetryRecord {
       level: level,
       stackTrace: stackTrace ?? this.stackTrace,
       additionalData: additionalData ?? this.additionalData,
+      networkInfo: networkInfo ?? this.networkInfo,
       priority: priority,
       attemptCount: attemptCount ?? this.attemptCount,
       nextRetryAt: nextRetryAt ?? this.nextRetryAt,
@@ -80,6 +84,7 @@ class TelemetryRecord {
       'level': level,
       'stack_trace': stackTrace,
       'additional_data': additionalData,
+      'network_info': networkInfo,
       'logged_at': loggedAt.toUtc().toIso8601String(),
       'priority': priority.name,
       'attempt_count': attemptCount,
@@ -99,6 +104,7 @@ class TelemetryRecord {
       level: json['level']?.toString(),
       stackTrace: json['stack_trace']?.toString(),
       additionalData: _mapFrom(json['additional_data']),
+      networkInfo: _mapFrom(json['network_info']),
       loggedAt: _dateFrom(json['logged_at']),
       priority: _priorityFrom(json['priority']),
       attemptCount: int.tryParse(json['attempt_count']?.toString() ?? '') ?? 0,

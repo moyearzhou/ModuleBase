@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:module_base/global/global_params.dart';
 import 'package:uuid/uuid.dart';
 
 import 'telemetry_clock.dart';
@@ -12,6 +13,8 @@ import 'telemetry_record.dart';
 import 'telemetry_sanitizer.dart';
 import 'telemetry_sender.dart';
 import 'telemetry_supabase_sender.dart';
+
+typedef TelemetryNetworkInfoProvider = Future<Map<String, dynamic>?> Function();
 
 class Telemetry {
   Telemetry._();
@@ -26,6 +29,8 @@ class Telemetry {
   TelemetryQueue _queue = MemoryTelemetryQueue();
   TelemetryClock _clock = const SystemTelemetryClock();
   TelemetrySanitizer _sanitizer = const TelemetrySanitizer();
+  TelemetryNetworkInfoProvider _networkInfoProvider =
+      GlobalReportParams.getNetWorkInfoMap;
   final TelemetryDiagnostics diagnostics = TelemetryDiagnostics();
   final Random _random = Random();
   final Uuid _uuid = const Uuid();
@@ -44,6 +49,7 @@ class Telemetry {
     TelemetryQueue? queue,
     TelemetryClock? clock,
     TelemetrySanitizer? sanitizer,
+    TelemetryNetworkInfoProvider? networkInfoProvider,
     bool? privacyConsentGranted,
   }) async {
     // Keep every dependency injectable. Tests use fake sender/clock/queue, and
@@ -53,6 +59,7 @@ class Telemetry {
     _queue = queue ?? _queue;
     _clock = clock ?? _clock;
     _sanitizer = sanitizer ?? _sanitizer;
+    _networkInfoProvider = networkInfoProvider ?? _networkInfoProvider;
     if (privacyConsentGranted != null) {
       _privacyConsentGranted = privacyConsentGranted;
     }
@@ -90,6 +97,7 @@ class Telemetry {
     TelemetryPriority priority = TelemetryPriority.normal,
   }) async {
     final now = _clock.now().toUtc();
+    final networkInfo = await _captureNetworkInfo();
     // loggedAt is the client occurrence time. Never recompute it during queue
     // persistence, retry, batch flush or Supabase insertion.
     final record = TelemetryRecord(
@@ -98,6 +106,7 @@ class Telemetry {
       eventName: eventName,
       eventDescription: eventDescription,
       eventProperties: eventProperties,
+      networkInfo: networkInfo,
       loggedAt: now,
       createdLocalAt: now,
       priority: priority,
@@ -113,6 +122,7 @@ class Telemetry {
     TelemetryPriority priority = TelemetryPriority.normal,
   }) async {
     final now = _clock.now().toUtc();
+    final networkInfo = await _captureNetworkInfo();
     // Logs use the same timestamp rule as events: loggedAt records when the log
     // was produced on device, not when it was uploaded.
     final record = TelemetryRecord(
@@ -122,6 +132,7 @@ class Telemetry {
       level: level,
       stackTrace: stackTrace,
       additionalData: params,
+      networkInfo: networkInfo,
       loggedAt: now,
       createdLocalAt: now,
       priority: priority,
@@ -173,6 +184,7 @@ class Telemetry {
     TelemetrySender? sender,
     TelemetryQueue? queue,
     TelemetryClock clock = const SystemTelemetryClock(),
+    TelemetryNetworkInfoProvider? networkInfoProvider,
     bool privacyConsentGranted = false,
   }) async {
     // Keep tests deterministic and isolated from global timers, random queues
@@ -184,6 +196,7 @@ class Telemetry {
     _queue = queue ?? MemoryTelemetryQueue();
     _clock = clock;
     _sanitizer = const TelemetrySanitizer();
+    _networkInfoProvider = networkInfoProvider ?? (() async => null);
     _privacyConsentGranted = privacyConsentGranted;
     _isFlushing = false;
     _rateWindows.clear();
@@ -308,13 +321,27 @@ class Telemetry {
     final stackTrace = _sanitizeString(record.stackTrace);
     final eventProperties = _sanitizeMap(record.eventProperties);
     final additionalData = _sanitizeMap(record.additionalData);
+    final networkInfo = _sanitizeMap(record.networkInfo);
     return record.copyWith(
       eventDescription: eventDescription,
       eventProperties: eventProperties,
       message: message,
       additionalData: additionalData,
+      networkInfo: networkInfo,
       stackTrace: stackTrace,
     );
+  }
+
+  Future<Map<String, dynamic>?> _captureNetworkInfo() async {
+    try {
+      // Capture network state at event/log production time. Sender retries may
+      // happen minutes later, so reading network info in the sender would turn
+      // an offline record into a later Wi-Fi record.
+      return await _networkInfoProvider();
+    } catch (e) {
+      _debug('Telemetry/Network capture failed message=$e');
+      return null;
+    }
   }
 
   String? _sanitizeString(String? value) {

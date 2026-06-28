@@ -53,7 +53,10 @@ class SupabaseTelemetrySender implements TelemetrySender {
       'app_version': appInfoMap['version_name'],
       'uuid': uuid,
       'device_info': await GlobalReportParams.getDeviceInfoMap(),
-      'network_info': await GlobalReportParams.getNetWorkInfoMap(),
+      // Prefer the creation-time snapshot stored on the record. The fallback
+      // only protects records queued before this field existed.
+      'network_info':
+          record.networkInfo ?? await GlobalReportParams.getNetWorkInfoMap(),
       'user_info': await GlobalReportParams.getUserInfoMap(),
       'app_info': appInfoMap,
       'logged_at': record.loggedAt.toUtc().toIso8601String(),
@@ -67,7 +70,9 @@ class SupabaseTelemetrySender implements TelemetrySender {
       'level': record.level ?? 'info',
       'message': record.message ?? '',
       'device_info': await GlobalReportParams.getDeviceInfoMap(),
-      'network_info': await GlobalReportParams.getNetWorkInfoMap(),
+      // Keep log network_info aligned with logged_at, not upload time.
+      'network_info':
+          record.networkInfo ?? await GlobalReportParams.getNetWorkInfoMap(),
       'user_info': await GlobalReportParams.getUserInfoMap(),
       'app_info': await GlobalReportParams.getAppInfoMap(),
       'stack_trace': record.stackTrace,
