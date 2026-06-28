@@ -20,6 +20,11 @@ class TelemetryRecord {
   final String? stackTrace;
   final Map<String, dynamic>? additionalData;
   final Map<String, dynamic>? networkInfo;
+  final Map<String, dynamic>? deviceInfo;
+  final Map<String, dynamic>? appInfo;
+  final Map<String, dynamic>? userInfo;
+  final String? platform;
+  final String? appVersion;
   final DateTime loggedAt;
   final TelemetryPriority priority;
   final int attemptCount;
@@ -39,6 +44,11 @@ class TelemetryRecord {
     this.stackTrace,
     this.additionalData,
     this.networkInfo,
+    this.deviceInfo,
+    this.appInfo,
+    this.userInfo,
+    this.platform,
+    this.appVersion,
     this.priority = TelemetryPriority.normal,
     this.attemptCount = 0,
     this.nextRetryAt,
@@ -50,6 +60,11 @@ class TelemetryRecord {
     String? message,
     Map<String, dynamic>? additionalData,
     Map<String, dynamic>? networkInfo,
+    Map<String, dynamic>? deviceInfo,
+    Map<String, dynamic>? appInfo,
+    Map<String, dynamic>? userInfo,
+    String? platform,
+    String? appVersion,
     String? stackTrace,
     int? attemptCount,
     DateTime? nextRetryAt,
@@ -67,6 +82,11 @@ class TelemetryRecord {
       stackTrace: stackTrace ?? this.stackTrace,
       additionalData: additionalData ?? this.additionalData,
       networkInfo: networkInfo ?? this.networkInfo,
+      deviceInfo: deviceInfo ?? this.deviceInfo,
+      appInfo: appInfo ?? this.appInfo,
+      userInfo: userInfo ?? this.userInfo,
+      platform: platform ?? this.platform,
+      appVersion: appVersion ?? this.appVersion,
       priority: priority,
       attemptCount: attemptCount ?? this.attemptCount,
       nextRetryAt: nextRetryAt ?? this.nextRetryAt,
@@ -85,6 +105,11 @@ class TelemetryRecord {
       'stack_trace': stackTrace,
       'additional_data': additionalData,
       'network_info': networkInfo,
+      'device_info': deviceInfo,
+      'app_info': appInfo,
+      'user_info': userInfo,
+      'platform': platform,
+      'app_version': appVersion,
       'logged_at': loggedAt.toUtc().toIso8601String(),
       'priority': priority.name,
       'attempt_count': attemptCount,
@@ -105,6 +130,11 @@ class TelemetryRecord {
       stackTrace: json['stack_trace']?.toString(),
       additionalData: _mapFrom(json['additional_data']),
       networkInfo: _mapFrom(json['network_info']),
+      deviceInfo: _mapFrom(json['device_info']),
+      appInfo: _mapFrom(json['app_info']),
+      userInfo: _mapFrom(json['user_info']),
+      platform: json['platform']?.toString(),
+      appVersion: json['app_version']?.toString(),
       loggedAt: _dateFrom(json['logged_at']),
       priority: _priorityFrom(json['priority']),
       attemptCount: int.tryParse(json['attempt_count']?.toString() ?? '') ?? 0,

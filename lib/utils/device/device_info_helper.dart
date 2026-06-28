@@ -5,7 +5,6 @@ import 'package:module_base/utils/device/device_utils.dart';
 import 'app_info_service.dart';
 
 class DeviceService {
-
   static Future<Map<String, dynamic>>? _harmonyDeviceInfoHook;
 
   // 初始化所有服务
@@ -34,7 +33,8 @@ class DeviceService {
 
   // 获取 Android 设备信息
   static Future<Map<String, dynamic>> _getAndroidDeviceInfo() async {
-    AndroidDeviceInfo androidInfo = await DeviceUtils.requiresDeviceInfo().androidInfo;
+    AndroidDeviceInfo androidInfo =
+        await DeviceUtils.requiresDeviceInfo().androidInfo;
 
     return {
       'platform': 'android',
@@ -78,9 +78,10 @@ class DeviceService {
       'device': iosInfo.modelName,
       'product': iosInfo.modelName,
       'hardware': iosInfo.utsname.machine,
-      'manufacturer': iosInfo.utsname.machine,
+      'manufacturer': 'Apple',
       'version': {
-        'sdkInt': iosInfo.systemVersion,
+        // iOS has no Android sdkInt. Keep systemVersion at top level and store
+        // the Darwin release separately for diagnostics.
         'release': iosInfo.utsname.release,
       },
       'utsname': {
@@ -96,7 +97,8 @@ class DeviceService {
   }
 
   static Future<Map<String, dynamic>> _getMacOSDeviceInfo() async {
-    MacOsDeviceInfo macosInfo = await DeviceUtils.requiresDeviceInfo().macOsInfo;
+    MacOsDeviceInfo macosInfo =
+        await DeviceUtils.requiresDeviceInfo().macOsInfo;
 
     return {
       'platform': Platform.operatingSystem,
@@ -107,7 +109,7 @@ class DeviceService {
       'systemVersion': macosInfo.majorVersion,
       'device': macosInfo.modelName,
       'product': macosInfo.modelName,
-      'hardware': macosInfo.hostName,
+      'hardware': macosInfo.model,
       'manufacturer': "Apple",
       'version': {
         'sdkInt': macosInfo.majorVersion,
@@ -125,8 +127,8 @@ class DeviceService {
     };
   }
 
-
-  static void registerHarmonyDeviceInfoHook(Future<Map<String, dynamic>> method) async {
+  static void registerHarmonyDeviceInfoHook(
+      Future<Map<String, dynamic>> method) async {
     _harmonyDeviceInfoHook = method;
   }
 
@@ -186,7 +188,8 @@ class DeviceService {
   // 获取网络类型
   static Future<String> getNetworkType() async {
     try {
-      var connectivityResult = await DeviceUtils.requiresConnectivity().checkConnectivity();
+      var connectivityResult =
+          await DeviceUtils.requiresConnectivity().checkConnectivity();
 
       switch (connectivityResult) {
         case ConnectivityResult.wifi:
@@ -211,7 +214,9 @@ class DeviceService {
 
   // 监听网络状态变化
   static Stream<String> get onNetworkStateChanged {
-    return DeviceUtils.requiresConnectivity().onConnectivityChanged.map((result) {
+    return DeviceUtils.requiresConnectivity()
+        .onConnectivityChanged
+        .map((result) {
       switch (result) {
         case ConnectivityResult.wifi:
           return 'wifi';

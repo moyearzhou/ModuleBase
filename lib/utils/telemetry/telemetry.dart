@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,34 @@ import 'telemetry_sender.dart';
 import 'telemetry_supabase_sender.dart';
 
 typedef TelemetryNetworkInfoProvider = Future<Map<String, dynamic>?> Function();
+typedef TelemetryReportContextProvider = Future<TelemetryReportContext>
+    Function();
+
+class TelemetryReportContext {
+  final Map<String, dynamic>? deviceInfo;
+  final Map<String, dynamic>? appInfo;
+  final Map<String, dynamic>? userInfo;
+  final Map<String, dynamic>? eventProperties;
+  final String? platform;
+  final String? appVersion;
+
+  const TelemetryReportContext({
+    this.deviceInfo,
+    this.appInfo,
+    this.userInfo,
+    this.eventProperties,
+    this.platform,
+    this.appVersion,
+  });
+
+  const TelemetryReportContext.empty()
+      : deviceInfo = null,
+        appInfo = null,
+        userInfo = null,
+        eventProperties = null,
+        platform = null,
+        appVersion = null;
+}
 
 class Telemetry {
   Telemetry._();
@@ -31,6 +60,8 @@ class Telemetry {
   TelemetrySanitizer _sanitizer = const TelemetrySanitizer();
   TelemetryNetworkInfoProvider _networkInfoProvider =
       GlobalReportParams.getNetWorkInfoMap;
+  TelemetryReportContextProvider _reportContextProvider =
+      _defaultReportContextProvider;
   final TelemetryDiagnostics diagnostics = TelemetryDiagnostics();
   final Random _random = Random();
   final Uuid _uuid = const Uuid();
@@ -50,6 +81,7 @@ class Telemetry {
     TelemetryClock? clock,
     TelemetrySanitizer? sanitizer,
     TelemetryNetworkInfoProvider? networkInfoProvider,
+    TelemetryReportContextProvider? reportContextProvider,
     bool? privacyConsentGranted,
   }) async {
     // Keep every dependency injectable. Tests use fake sender/clock/queue, and
@@ -60,6 +92,7 @@ class Telemetry {
     _clock = clock ?? _clock;
     _sanitizer = sanitizer ?? _sanitizer;
     _networkInfoProvider = networkInfoProvider ?? _networkInfoProvider;
+    _reportContextProvider = reportContextProvider ?? _reportContextProvider;
     if (privacyConsentGranted != null) {
       _privacyConsentGranted = privacyConsentGranted;
     }
@@ -98,6 +131,7 @@ class Telemetry {
   }) async {
     final now = _clock.now().toUtc();
     final networkInfo = await _captureNetworkInfo();
+    final reportContext = await _captureReportContext();
     // loggedAt is the client occurrence time. Never recompute it during queue
     // persistence, retry, batch flush or Supabase insertion.
     final record = TelemetryRecord(
@@ -105,8 +139,16 @@ class Telemetry {
       type: TelemetryRecordType.event,
       eventName: eventName,
       eventDescription: eventDescription,
-      eventProperties: eventProperties,
+      eventProperties: _mergeEventProperties(
+        eventProperties,
+        reportContext.eventProperties,
+      ),
       networkInfo: networkInfo,
+      deviceInfo: reportContext.deviceInfo,
+      appInfo: reportContext.appInfo,
+      userInfo: reportContext.userInfo,
+      platform: reportContext.platform,
+      appVersion: reportContext.appVersion,
       loggedAt: now,
       createdLocalAt: now,
       priority: priority,
@@ -123,6 +165,7 @@ class Telemetry {
   }) async {
     final now = _clock.now().toUtc();
     final networkInfo = await _captureNetworkInfo();
+    final reportContext = await _captureReportContext();
     // Logs use the same timestamp rule as events: loggedAt records when the log
     // was produced on device, not when it was uploaded.
     final record = TelemetryRecord(
@@ -133,6 +176,11 @@ class Telemetry {
       stackTrace: stackTrace,
       additionalData: params,
       networkInfo: networkInfo,
+      deviceInfo: reportContext.deviceInfo,
+      appInfo: reportContext.appInfo,
+      userInfo: reportContext.userInfo,
+      platform: reportContext.platform,
+      appVersion: reportContext.appVersion,
       loggedAt: now,
       createdLocalAt: now,
       priority: priority,
@@ -185,6 +233,7 @@ class Telemetry {
     TelemetryQueue? queue,
     TelemetryClock clock = const SystemTelemetryClock(),
     TelemetryNetworkInfoProvider? networkInfoProvider,
+    TelemetryReportContextProvider? reportContextProvider,
     bool privacyConsentGranted = false,
   }) async {
     // Keep tests deterministic and isolated from global timers, random queues
@@ -197,6 +246,8 @@ class Telemetry {
     _clock = clock;
     _sanitizer = const TelemetrySanitizer();
     _networkInfoProvider = networkInfoProvider ?? (() async => null);
+    _reportContextProvider = reportContextProvider ??
+        (() async => const TelemetryReportContext.empty());
     _privacyConsentGranted = privacyConsentGranted;
     _isFlushing = false;
     _rateWindows.clear();
@@ -322,12 +373,18 @@ class Telemetry {
     final eventProperties = _sanitizeMap(record.eventProperties);
     final additionalData = _sanitizeMap(record.additionalData);
     final networkInfo = _sanitizeMap(record.networkInfo);
+    final deviceInfo = _sanitizeMap(record.deviceInfo);
+    final appInfo = _sanitizeMap(record.appInfo);
+    final userInfo = _sanitizeMap(record.userInfo);
     return record.copyWith(
       eventDescription: eventDescription,
       eventProperties: eventProperties,
       message: message,
       additionalData: additionalData,
       networkInfo: networkInfo,
+      deviceInfo: deviceInfo,
+      appInfo: appInfo,
+      userInfo: userInfo,
       stackTrace: stackTrace,
     );
   }
@@ -342,6 +399,37 @@ class Telemetry {
       _debug('Telemetry/Network capture failed message=$e');
       return null;
     }
+  }
+
+  Future<TelemetryReportContext> _captureReportContext() async {
+    try {
+      // Public report context must be captured with loggedAt. If the app is
+      // upgraded or the user switches accounts before offline records flush,
+      // sender-time reads would describe the replay moment instead of the bug.
+      return await _reportContextProvider();
+    } catch (e) {
+      _debug('Telemetry/Context capture failed message=$e');
+      return const TelemetryReportContext.empty();
+    }
+  }
+
+  Map<String, dynamic>? _mergeEventProperties(
+    Map<String, dynamic>? eventProperties,
+    Map<String, dynamic>? commonEventProperties,
+  ) {
+    if (eventProperties == null && commonEventProperties == null) {
+      return null;
+    }
+    final merged = <String, dynamic>{};
+    if (eventProperties != null) {
+      merged.addAll(eventProperties);
+    }
+    if (commonEventProperties != null) {
+      // Preserve the previous sender behavior: common event properties are
+      // appended after caller properties and can override duplicate keys.
+      merged.addAll(commonEventProperties);
+    }
+    return merged;
   }
 
   String? _sanitizeString(String? value) {
@@ -394,4 +482,30 @@ class Telemetry {
       debugPrint(message);
     }
   }
+}
+
+Future<TelemetryReportContext> _defaultReportContextProvider() async {
+  final appInfo = await GlobalReportParams.getAppInfoMap();
+  return TelemetryReportContext(
+    deviceInfo: await GlobalReportParams.getDeviceInfoMap(),
+    appInfo: appInfo,
+    userInfo: await GlobalReportParams.getUserInfoMap(),
+    eventProperties:
+        _mapFrom(GlobalReportParams.getCommonParams()['event_properties']),
+    platform: Platform.operatingSystem,
+    appVersion: appInfo['version_name']?.toString(),
+  );
+}
+
+Map<String, dynamic>? _mapFrom(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is Map<String, dynamic>) {
+    return Map<String, dynamic>.from(value);
+  }
+  if (value is Map) {
+    return Map<String, dynamic>.from(value);
+  }
+  return null;
 }

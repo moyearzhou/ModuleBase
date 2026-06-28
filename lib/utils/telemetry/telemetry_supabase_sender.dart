@@ -29,35 +29,29 @@ class SupabaseTelemetrySender implements TelemetrySender {
   }
 
   Future<void> _sendEvent(TelemetryRecord record) async {
-    final uuid = await AppUserHelper.getUUID();
-    final commonProps = GlobalReportParams.getCommonParams();
-    final mergedEventProperties = <String, dynamic>{};
-    if (record.eventProperties != null) {
-      mergedEventProperties.addAll(record.eventProperties!);
-    }
-    if (commonProps['event_properties'] is Map) {
-      mergedEventProperties.addAll(
-        Map<String, dynamic>.from(commonProps['event_properties']),
-      );
-    }
+    final appInfoMap =
+        record.appInfo ?? await GlobalReportParams.getAppInfoMap();
+    final userInfoMap =
+        record.userInfo ?? await GlobalReportParams.getUserInfoMap();
+    final uuid =
+        userInfoMap['unique_id']?.toString() ?? await AppUserHelper.getUUID();
 
-    final appInfoMap = await GlobalReportParams.getAppInfoMap();
     // Server created_at remains the Supabase insertion time. logged_at is sent
     // from the fixed client record so offline replay keeps the original time.
     await Supabase.instance.client.from('tracking_events').insert({
       'event_name': record.eventName ?? '',
       'event_description': record.eventDescription ?? '',
-      'event_properties':
-          mergedEventProperties.isNotEmpty ? mergedEventProperties : null,
-      'platform': Platform.operatingSystem,
-      'app_version': appInfoMap['version_name'],
+      'event_properties': record.eventProperties,
+      'platform': record.platform ?? Platform.operatingSystem,
+      'app_version': record.appVersion ?? appInfoMap['version_name'],
       'uuid': uuid,
-      'device_info': await GlobalReportParams.getDeviceInfoMap(),
+      'device_info':
+          record.deviceInfo ?? await GlobalReportParams.getDeviceInfoMap(),
       // Prefer the creation-time snapshot stored on the record. The fallback
       // only protects records queued before this field existed.
       'network_info':
           record.networkInfo ?? await GlobalReportParams.getNetWorkInfoMap(),
-      'user_info': await GlobalReportParams.getUserInfoMap(),
+      'user_info': userInfoMap,
       'app_info': appInfoMap,
       'logged_at': record.loggedAt.toUtc().toIso8601String(),
     });
@@ -69,14 +63,15 @@ class SupabaseTelemetrySender implements TelemetrySender {
     await Supabase.instance.client.from('zotpaper_logs').insert({
       'level': record.level ?? 'info',
       'message': record.message ?? '',
-      'device_info': await GlobalReportParams.getDeviceInfoMap(),
+      'device_info':
+          record.deviceInfo ?? await GlobalReportParams.getDeviceInfoMap(),
       // Keep log network_info aligned with logged_at, not upload time.
       'network_info':
           record.networkInfo ?? await GlobalReportParams.getNetWorkInfoMap(),
-      'user_info': await GlobalReportParams.getUserInfoMap(),
-      'app_info': await GlobalReportParams.getAppInfoMap(),
+      'user_info': record.userInfo ?? await GlobalReportParams.getUserInfoMap(),
+      'app_info': record.appInfo ?? await GlobalReportParams.getAppInfoMap(),
       'stack_trace': record.stackTrace,
-      'platform': Platform.operatingSystem,
+      'platform': record.platform ?? Platform.operatingSystem,
       'additional_data': record.additionalData ?? {},
       'logged_at': record.loggedAt.toUtc().toIso8601String(),
     });
