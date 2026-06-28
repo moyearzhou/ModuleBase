@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_boost/flutter_boost.dart';
 
 import '../generated/l10n/l10n.dart';
 import '../generated/l10n/l10n_en.dart';
@@ -16,7 +15,7 @@ class AppLocal {
   /// 同步系统语言
   static syncSystem() {
     Locale locale = WidgetsBinding.instance.window.locale;
-    Logger.log("Current Local is: ${locale.languageCode}");
+    debugPrint("Current Local is: ${locale.languageCode}");
 
     switch (locale.languageCode) {
       case 'zh':
