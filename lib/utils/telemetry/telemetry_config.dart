@@ -32,7 +32,7 @@ class TelemetryConfig {
     this.sampleRate = 1.0,
     this.highFrequencyWindow = const Duration(seconds: 60),
     this.highFrequencyLimit = 30,
-    this.requirePrivacyConsent = false,
+    this.requirePrivacyConsent = true,
     this.debugLogging = false,
   });
 

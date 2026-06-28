@@ -44,6 +44,7 @@ class Telemetry {
     TelemetryQueue? queue,
     TelemetryClock? clock,
     TelemetrySanitizer? sanitizer,
+    bool? privacyConsentGranted,
   }) async {
     // Keep every dependency injectable. Tests use fake sender/clock/queue, and
     // production can switch the sender later without touching business callers.
@@ -52,6 +53,9 @@ class Telemetry {
     _queue = queue ?? _queue;
     _clock = clock ?? _clock;
     _sanitizer = sanitizer ?? _sanitizer;
+    if (privacyConsentGranted != null) {
+      _privacyConsentGranted = privacyConsentGranted;
+    }
     _resetFlushTimer();
   }
 
@@ -166,6 +170,7 @@ class Telemetry {
     TelemetrySender? sender,
     TelemetryQueue? queue,
     TelemetryClock clock = const SystemTelemetryClock(),
+    bool privacyConsentGranted = false,
   }) async {
     // Keep tests deterministic and isolated from global timers, random queues
     // and the default Supabase sender.
@@ -176,7 +181,7 @@ class Telemetry {
     _queue = queue ?? MemoryTelemetryQueue();
     _clock = clock;
     _sanitizer = const TelemetrySanitizer();
-    _privacyConsentGranted = false;
+    _privacyConsentGranted = privacyConsentGranted;
     _isFlushing = false;
     _rateWindows.clear();
     diagnostics.reset();
@@ -224,7 +229,6 @@ class Telemetry {
 
   Future<TelemetrySendResult> _send(TelemetryRecord record) async {
     final activeSender = _sender ?? SupabaseTelemetrySender();
-    _sender = activeSender;
     final result = await activeSender.send(record);
     if (result.success) {
       diagnostics.sentRecords++;
@@ -253,17 +257,25 @@ class Telemetry {
   }
 
   bool _checkRateLimit(TelemetryRecord record) {
+    if (record.priority == TelemetryPriority.critical) {
+      return true;
+    }
+
     // Rate limiting is intentionally local and coarse-grained. It prevents a
     // single noisy event/log from flooding Supabase while leaving unrelated
     // records in the same minute window untouched.
+    final now = _clock.now().toUtc();
+    _rateWindows.removeWhere((_, window) {
+      window.removeWhere(
+        (item) => now.difference(item) > _config.highFrequencyWindow,
+      );
+      return window.isEmpty;
+    });
+
     final key = record.type == TelemetryRecordType.event
         ? 'event:${record.eventName ?? ''}'
-        : 'log:${record.level ?? ''}:${record.message ?? ''}';
-    final now = _clock.now().toUtc();
+        : 'log:${record.level ?? ''}';
     final window = _rateWindows.putIfAbsent(key, () => []);
-    window.removeWhere(
-      (item) => now.difference(item) > _config.highFrequencyWindow,
-    );
     if (window.length >= _config.highFrequencyLimit) {
       _debug('Telemetry/Drop reason=rate_limit key=$key');
       return false;

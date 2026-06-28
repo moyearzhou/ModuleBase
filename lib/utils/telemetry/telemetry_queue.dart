@@ -29,7 +29,8 @@ class MemoryTelemetryQueue implements TelemetryQueue {
 
   @override
   Future<List<TelemetryRecord>> peek(int limit) async {
-    return _records.take(limit).toList(growable: false);
+    final records = List<TelemetryRecord>.from(_records)..sort(_compareRecord);
+    return records.take(limit).toList(growable: false);
   }
 
   @override
@@ -77,14 +78,15 @@ class HiveTelemetryQueue implements TelemetryQueue {
     // Keep peek non-destructive. Records are removed only after sender success
     // or an explicit terminal drop decision.
     final records = <TelemetryRecord>[];
-    for (final key in _box.keys.take(limit)) {
+    for (final key in _box.keys) {
       final value = _box.get(key);
       if (value is Map) {
         records.add(
             TelemetryRecord.fromQueueJson(Map<String, dynamic>.from(value)));
       }
     }
-    return records;
+    records.sort(_compareRecord);
+    return records.take(limit).toList(growable: false);
   }
 
   @override
@@ -96,4 +98,16 @@ class HiveTelemetryQueue implements TelemetryQueue {
   Future<void> replace(TelemetryRecord record) async {
     await _box.put(record.id, record.toQueueJson());
   }
+}
+
+int _compareRecord(TelemetryRecord a, TelemetryRecord b) {
+  final priorityOrder = a.priority.index.compareTo(b.priority.index);
+  if (priorityOrder != 0) {
+    return priorityOrder;
+  }
+  final loggedAtOrder = a.loggedAt.compareTo(b.loggedAt);
+  if (loggedAtOrder != 0) {
+    return loggedAtOrder;
+  }
+  return a.createdLocalAt.compareTo(b.createdLocalAt);
 }
