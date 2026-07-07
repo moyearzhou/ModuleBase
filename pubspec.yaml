@@ -120,6 +120,11 @@ dependencies:
 
   open_filex: ^4.5.0
 
+  neatly:
+    git:
+      url: git@github.com:ZotPaper/Neatly.git
+      ref: release/0.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
