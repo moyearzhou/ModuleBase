@@ -1,56 +1,66 @@
-import 'package:bruno/bruno.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:neatly/neatly.dart';
 
+/// Deprecated name retained for callers while selection uses a Neatly sheet.
 class BrnPickerUtils {
+  const BrnPickerUtils._();
 
   static void show(
-      BuildContext context, {
-        required contentWidget,
-        String title = '',
-        dynamic confirm,
-        dynamic cancel,
-        VoidCallback? onConfirm,
-        VoidCallback? onCancel,
-        bool barrierDismissible = true,
-        bool showTitle = true,
-        bool useRootNavigator = false,
-      }) {
-    final ThemeData theme = Theme.of(context);
-    showGeneralDialog(
+    BuildContext context, {
+    required Widget contentWidget,
+    String title = '',
+    dynamic confirm,
+    dynamic cancel,
+    VoidCallback? onConfirm,
+    VoidCallback? onCancel,
+    bool barrierDismissible = true,
+    bool showTitle = true,
+    bool useRootNavigator = false,
+  }) {
+    final theme = NeatlyTheme.of(context);
+    showModalBottomSheet<void>(
       context: context,
       useRootNavigator: useRootNavigator,
-      pageBuilder: (BuildContext buildContext, Animation<double> animation,
-          Animation<double> secondaryAnimation) {
-        final Widget pageChild = BrnBottomPickerWidget(
-          contentWidget: contentWidget,
-          confirm: confirm,
-          cancel: cancel,
-          onConfirmPressed: onConfirm,
-          onCancelPressed: onCancel,
-          barrierDismissible: barrierDismissible,
-          pickerTitleConfig: BrnPickerTitleConfig(
-            titleContent: title,
-            showTitle: showTitle,
+      isDismissible: barrierDismissible,
+      backgroundColor: Colors.transparent,
+      barrierColor: theme.dialog.scrim,
+      builder: (sheetContext) => NeatlyTheme(
+        data: theme,
+        child: NeatlyFullWidthSheet(
+          title: showTitle ? title : null,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              contentWidget,
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: NeatlyButton(
+                      label: cancel?.toString() ?? '取消',
+                      variant: NeatlyButtonVariant.outline,
+                      onPressed: () {
+                        onCancel?.call();
+                        Navigator.of(sheetContext).pop();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: NeatlyPrimaryButton(
+                      label: confirm?.toString() ?? '确定',
+                      onPressed: () {
+                        onConfirm?.call();
+                        Navigator.of(sheetContext).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-        return Theme(data: theme, child: pageChild);
-      },
-      barrierDismissible: barrierDismissible,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 150),
-      transitionBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation, Widget child) {
-        return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          ),
-          child: child,
-        );
-      },
+        ),
+      ),
     );
   }
-
 }
