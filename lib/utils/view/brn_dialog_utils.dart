@@ -1,76 +1,50 @@
-import 'package:bruno/bruno.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:module_base/view/dialog/neat_dialog.dart';
 
+/// Deprecated name retained while the implementation no longer uses Bruno.
 class BrnDialogUtils {
+  const BrnDialogUtils._();
 
-  /// 展示底部有两个按钮的弹窗 左侧是cancel 右侧是confirm
-  /// cancel 左侧显示的文案
-  /// confirm 右侧显示的文案
-  /// cancelWidget 自定义显示的左侧
-  /// conformWidget 自定义显示的右侧
   static void showConfirmDialog(
-      BuildContext context, {
-        required String cancel,
-        required String confirm,
-        bool showIcon = false,
-        Image? iconWidget,
-        String? title,
-        Widget? titleWidget,
-        String? message,
-        Widget? messageWidget,
-        String? warning,
-        Widget? warningWidget,
-        Widget? cancelWidget,
-        Widget? conformWidget,
-        GestureTapCallback? onCancel,
-        GestureTapCallback? onConfirm,
-        bool barrierDismissible = true,
-        bool useRootNavigator = false,
-        int titleMaxLines = cTitleMaxLines,
-        BrnDialogConfig? themeData,
-      }) {
-    List<Widget> actionsWidget = [];
-
-    if (cancelWidget != null) {
-      actionsWidget.add(cancelWidget);
-    }
-    if (conformWidget != null) {
-      actionsWidget.add(conformWidget);
-    }
-    showDialog<void>(
-      context: context,
-      useRootNavigator: useRootNavigator,
+    BuildContext context, {
+    required String cancel,
+    required String confirm,
+    bool showIcon = false,
+    Image? iconWidget,
+    String? title,
+    Widget? titleWidget,
+    String? message,
+    Widget? messageWidget,
+    String? warning,
+    Widget? warningWidget,
+    Widget? cancelWidget,
+    Widget? conformWidget,
+    GestureTapCallback? onCancel,
+    GestureTapCallback? onConfirm,
+    bool barrierDismissible = true,
+    bool useRootNavigator = false,
+    int titleMaxLines = 2,
+    Object? themeData,
+  }) {
+    NeatDialogManager.showConfirmDialog(
+      context,
+      cancel: cancel,
+      confirm: confirm,
+      showIcon: showIcon,
+      iconWidget: iconWidget,
+      title: title,
+      titleWidget: titleWidget,
+      message: message,
+      messageWidget: messageWidget,
+      warning: warning,
+      warningWidget: warningWidget,
+      cancelWidget: cancelWidget,
+      conformWidget: conformWidget,
       barrierDismissible: barrierDismissible,
-      builder: (BuildContext dialogContext) {
-        return BrnDialog(
-          iconImage: iconWidget,
-          showIcon: showIcon,
-          titleText: title,
-          titleWidget: titleWidget,
-          messageText: message,
-          contentWidget: messageWidget,
-          warningWidget: warningWidget,
-          warningText: warning,
-          themeData: themeData,
-          titleMaxLines: titleMaxLines,
-          actionsText: [cancel, confirm],
-          actionsWidget: actionsWidget,
-          indexedActionCallback: (index) {
-            if (index == 0) {
-              if (onCancel != null) {
-                onCancel();
-              }
-            }
-            if (index == 1) {
-              if (onConfirm != null) {
-                onConfirm();
-              }
-            }
-          },
-        );
-      },
+      titleMaxLines: titleMaxLines,
+      themeData: themeData,
+      onCancel: (_) => onCancel?.call(),
+      onConfirm: (_) => onConfirm?.call(),
     );
   }
-
 }

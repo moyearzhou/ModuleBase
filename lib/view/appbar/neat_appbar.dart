@@ -1,103 +1,69 @@
-import 'package:bruno/bruno.dart';
 import 'package:flutter/material.dart';
-import 'package:module_base/ext/common.dart';
-import '../../theme/my_theme.dart';
+import 'package:neatly/neatly.dart';
 
 class ItemMenu {
+  const ItemMenu(this.key, this.title, this.icon, this.tap);
+
   final String key;
   final String title;
   final IconData icon;
-  final Function? tap;
-  ItemMenu(this.key, this.title, this.icon, this.tap);
+  final VoidCallback? tap;
 }
 
 class AppbarIcon {
-  final IconData icon;
-  final Function? tap;
-  final color = AppThemes.textMain;
+  const AppbarIcon(this.icon, this.tap);
 
-  AppbarIcon(this.icon, this.tap);
+  final IconData icon;
+  final VoidCallback? tap;
 }
 
+/// Legacy wrapper backed by Neatly's app bar instead of Bruno.
 PreferredSizeWidget neatAppBar(
   String title,
   AppbarIcon? leadingIcon,
   List<ItemMenu>? moreOptionsMenus,
-  Function moreOptionTap) {
-  return AppBar(
-    leading: leadingIcon != null ? IconButton(
-        onPressed: () {
-          leadingIcon.tap?.call();
-        },
-        icon: Icon(leadingIcon.icon, color: leadingIcon.color,)) : null,
-    automaticallyImplyLeading: leadingIcon != null,
-    toolbarHeight: 46,
-    backgroundColor: AppThemes.bgColor,
-    title: Center(
-      child: Text(
-        title,
-        style: TextStyle(fontSize: 16, color: AppThemes.textMain),
-      ),
-    ),
-
-    actionsIconTheme: IconThemeData(color: AppThemes.textMain),
-    actions: [
-      PopupMenuButton<String>(
-        color: AppThemes.bgColor,
-        // splashRadius: 20,
-        shadowColor: const Color(0x88FFFFFF),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-        onSelected: (String result) {
-          // todo 根据id
-          for (var menu in moreOptionsMenus!) {
-            if (menu.key == result) {
-              menu.tap!();
-            }
-          }
-        },
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          ...moreOptionsMenus!.map((menu) {
-            return PopupMenuItem<String>(
-              value: menu.key,
-              child: Text(menu.title, style: TextStyle(color: AppThemes.textMain)),
-            );
-          })
-        ],
-      ),
-    ],
-  );
-}
-
-
-PreferredSizeWidget simpleAppBar({
-  BuildContext? context,
-  String title = "",
-  dynamic actions,
-}) {
-  bool isDark = context?.isDark == true;
-  Color? bgColor;
-  if (isDark) {
-    bgColor = AppThemes.darkTheme.scaffoldBackgroundColor;
-  }
-
-  return BrnAppBar(
-    automaticallyImplyLeading: true,
-    backgroundColor: bgColor,
-    leading: BrnBackLeading(
-      child: Icon(Icons.arrow_back_ios_new_outlined, size: 20, color: isDark ? Colors.white: AppThemes.textMain,),
-    ),
-    title: Text(
-      title,
-      style: TextStyle(fontSize: 16, color: isDark ? Colors.white: AppThemes.textMain),
-    ),
-    iconTheme: IconThemeData(
-        color: AppThemes.textMain,
-    ),
+  Function moreOptionTap,
+) {
+  final actions = moreOptionsMenus == null || moreOptionsMenus.isEmpty
+      ? null
+      : <Widget>[
+          PopupMenuButton<String>(
+            onSelected: (key) {
+              for (final menu in moreOptionsMenus) {
+                if (menu.key == key) menu.tap?.call();
+              }
+            },
+            itemBuilder: (context) => moreOptionsMenus
+                .map(
+                  (menu) => PopupMenuItem<String>(
+                    value: menu.key,
+                    child: Row(
+                      children: [
+                        Icon(menu.icon, size: 18),
+                        const SizedBox(width: 8),
+                        Text(menu.title),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          ),
+        ];
+  return NeatlyAppBar(
+    title: title,
+    automaticallyImplyLeading: leadingIcon == null,
+    leading: leadingIcon == null
+        ? null
+        : IconButton(onPressed: leadingIcon.tap, icon: Icon(leadingIcon.icon)),
     actions: actions,
   );
 }
 
-
-
+PreferredSizeWidget simpleAppBar({
+  BuildContext? context,
+  String title = '',
+  dynamic actions,
+}) => NeatlyAppBar(
+  title: title,
+  actions: actions is List<Widget> ? actions : null,
+);
