@@ -26,7 +26,7 @@ class FileOpenManager {
     } else {
       final result = await OpenFilex.open(
         path,
-        type: "application/pdf",
+        type: type,
       );
       return OpenRes(type: OpenRes.convertJson(result.type.index), message: result.message);
     }
