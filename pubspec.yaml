@@ -15,7 +15,7 @@ description: "ZotPaper公共基类"
 # This version is used _only_ for the Runner app, which is used if you just do
 # a `flutter run` or a `flutter make-host-app-editable`. It has no impact
 # on any other native host app that you embed your Flutter project into.
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=3.4.0'
@@ -31,12 +31,6 @@ dependencies:
   # provider
   provider: ^6.1.0  # 使用最新版本
 
-  # flutter_boost
-  flutter_boost:
-    git:
-      url: 'https://github.com/alibaba/flutter_boost.git'
-      ref: '5.0.2'
-
 #  webdav_client:
 #    git:
 #      ref: v1.0.66
@@ -45,7 +39,7 @@ dependencies:
   # 多语言支持
   flutter_localizations:
     sdk: flutter
-  intl: ^0.19.0
+  intl: ^0.20.2
 
   #  fl_lib:
   #    path: ../fl_lib
@@ -91,14 +85,6 @@ dependencies:
 
   event_bus: ^2.0.1
 
-  # Bruno UI组件库
-  #  bruno: ^3.4.3
-  bruno:
-    #    path: /Users/moyear/StudioProjects/bruno-moyear
-    git:
-      url: https://github.com/moyearzhou/bruno-moyear.git
-  #      ref: v3.4.3
-
   # bugly
   flutter_bugly: ^1.1.0
 
@@ -125,6 +111,11 @@ dependencies:
       ref: v-0.1.1
 
   open_filex: ^4.5.0
+
+  neatly:
+    git:
+      url: git@github.com:ZotPaper/Neatly.git
+      ref: 0.0.2
 
 dev_dependencies:
   flutter_test:

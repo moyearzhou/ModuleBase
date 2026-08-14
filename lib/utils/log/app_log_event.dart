@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:module_base/global/global_params.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:module_base/utils/telemetry/telemetry.dart';
 
 enum LogLevel {
   info,
@@ -34,40 +32,16 @@ Future<void> logEvent({
   Map<String, dynamic>? params,
   required String message,
 }) async {
-  debugPrint("Supabase logEvent： $message");
-
   try {
-    // 用户信息
-    final userInfo = await GlobalReportParams.getUserInfoMap();
-
-    // 合并 device_info
-    final deviceInfo = await GlobalReportParams.getDeviceInfoMap();
-
-    // app信息
-    final appInfoMap = await GlobalReportParams.getAppInfoMap();
-
-    // 网络信息
-    final netWorkInfoMap = await GlobalReportParams.getNetWorkInfoMap();
-
-    var additionalData = params ?? {};
-
-    await Supabase.instance.client
-        .from('zotpaper_logs')
-        .insert({
-      'level': logLevel.toLevel(),
-      'message': message,
-      'device_info': deviceInfo,
-      // 'user_id': '', // 如果有的话
-      'network_info': netWorkInfoMap,
-      'user_info': userInfo,
-      'app_info': appInfoMap,
-      'stack_trace': stackTrace,
-      'platform': Platform.operatingSystem,
-      'additional_data': additionalData,
-    });
+    debugPrint("Telemetry logEvent： $message");
+    await Telemetry.instance.log(
+      level: logLevel.toLevel(),
+      message: message,
+      stackTrace: stackTrace,
+      params: params,
+    );
   } catch (e) {
-    debugPrint("Supabase logEvent error： $e");
+    debugPrint("Telemetry logEvent error： $e");
     // 日志记录失败不应影响正常业务流程，不再向上抛出异常
   }
-
 }
