@@ -115,7 +115,7 @@ dependencies:
   neatly:
     git:
       url: git@github.com:ZotPaper/Neatly.git
-      ref: release/0.0.2
+      ref: 0.0.2
 
 dev_dependencies:
   flutter_test:
