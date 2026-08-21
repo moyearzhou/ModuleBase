@@ -114,8 +114,7 @@ class Telemetry {
   }
 
   void setPrivacyConsent(bool granted) {
-    // Consent only controls remote sending. Records created before consent can
-    // stay queued after sanitizing, then flush once the host app grants consent.
+    // Consent controls both local collection and remote sending.
     _privacyConsentGranted = granted;
     _debug('Telemetry/Privacy allowed=$granted');
     if (granted) {
@@ -129,6 +128,9 @@ class Telemetry {
     Map<String, dynamic>? eventProperties,
     TelemetryPriority priority = TelemetryPriority.normal,
   }) async {
+    if (!_canCollect()) {
+      return;
+    }
     final now = _clock.now().toUtc();
     final networkInfo = await _captureNetworkInfo();
     final reportContext = await _captureReportContext();
@@ -163,6 +165,9 @@ class Telemetry {
     required String message,
     TelemetryPriority priority = TelemetryPriority.normal,
   }) async {
+    if (!_canCollect()) {
+      return;
+    }
     final now = _clock.now().toUtc();
     final networkInfo = await _captureNetworkInfo();
     final reportContext = await _captureReportContext();
@@ -362,6 +367,10 @@ class Telemetry {
       return false;
     }
     return true;
+  }
+
+  bool _canCollect() {
+    return !_config.requirePrivacyConsent || _privacyConsentGranted;
   }
 
   TelemetryRecord _sanitize(TelemetryRecord record) {
