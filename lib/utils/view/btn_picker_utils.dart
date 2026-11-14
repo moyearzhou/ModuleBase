@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:neatly/neatly.dart';
 
+import '../../view/dialog/neat_surface_theme.dart';
+
 /// Deprecated name retained for callers while selection uses a Neatly sheet.
 class BrnPickerUtils {
   const BrnPickerUtils._();
@@ -24,8 +26,8 @@ class BrnPickerUtils {
       isDismissible: barrierDismissible,
       backgroundColor: Colors.transparent,
       barrierColor: theme.dialog.scrim,
-      builder: (sheetContext) => NeatlyTheme(
-        data: theme,
+      builder: (sheetContext) => NeatSurfaceTheme(
+        appearance: theme,
         child: NeatlyFullWidthSheet(
           title: showTitle ? title : null,
           child: Column(
