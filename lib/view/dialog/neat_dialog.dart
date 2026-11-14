@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:neatly/neatly.dart';
 
+import 'neat_surface_theme.dart';
+
 /// Source-compatible dialog facade backed by Neatly.
 class NeatDialogManager {
   const NeatDialogManager._();
@@ -29,8 +31,8 @@ class NeatDialogManager {
     showDialog<void>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: (dialogContext) => NeatlyTheme(
-        data: theme,
+      builder: (dialogContext) => NeatSurfaceTheme(
+        appearance: theme,
         child: NeatlyDialog(
           title: title ?? '',
           message: message,

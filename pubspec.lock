@@ -545,11 +545,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0.0.3"
-      resolved-ref: "9ccc9c3d3f6a34507a0792eaa2e5406b10fd677d"
+      ref: "0.0.4"
+      resolved-ref: "5833e5a7bb3ff9124cd7b84e8fb2d0014a201be7"
       url: "git@github.com:ZotPaper/Neatly.git"
     source: git
-    version: "0.0.2"
+    version: "0.0.4"
   nested:
     dependency: transitive
     description:
