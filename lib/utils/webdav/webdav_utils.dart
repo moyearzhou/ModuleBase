@@ -13,7 +13,7 @@ class WebdavUtils {
         user: userName,
         password: password,
       );
-      var res = await webdav.readDir("/");
+      await webdav.readDir("/");
       // await webdav.ping();
       return true;
     } catch (e) {

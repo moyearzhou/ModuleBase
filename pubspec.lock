@@ -544,12 +544,11 @@ packages:
   neatly:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "0.0.4"
-      resolved-ref: "5833e5a7bb3ff9124cd7b84e8fb2d0014a201be7"
-      url: "git@github.com:ZotPaper/Neatly.git"
-    source: git
-    version: "0.0.4"
+      name: neatly
+      sha256: e0efa7f5d09e6b34ca6ef8f950e347a92ad1618437fcc87d959d322e3a4c8ed5
+      url: "https://pub.zotpaper.cn"
+    source: hosted
+    version: "0.0.5"
   nested:
     dependency: transitive
     description:
@@ -1086,12 +1085,11 @@ packages:
   webdav_client:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "v-0.1.1"
-      resolved-ref: c2d9ddb1d2d98c5593740536460854175d8300cf
-      url: "git@github.com:moyearzhou/webdav_client2.git"
-    source: git
-    version: "1.2.2"
+      name: webdav_client
+      sha256: "1a57efecb078dfb78d8c5d01c495e1f3b12648c3dbc66b5bdf7202b780fd8ad7"
+      url: "https://pub.zotpaper.cn"
+    source: hosted
+    version: "1.2.3"
   webview_flutter:
     dependency: "direct main"
     description:
