@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../res/l10n.dart';
-
 final class CountDownBtn extends StatefulWidget {
   final int seconds;
   final String? text;
