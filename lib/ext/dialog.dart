@@ -1,15 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
-
-import '../res/l10n.dart';
-import '../utils/logger.dart';
-import '../utils/platform/base.dart';
-import '../view/loading.dart';
-import '../view/widget/btn/btn.dart';
 
 extension DialogX on BuildContext {
   Future<T?> showRoundDialog<T>({
@@ -398,11 +389,4 @@ extension DialogX on BuildContext {
 //       actions: Btnx.oks,
 //     );
 //   }
-}
-
-enum _ImportFrom {
-  file,
-  network,
-  clipboard,
-  ;
 }

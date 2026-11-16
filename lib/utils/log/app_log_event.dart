@@ -20,8 +20,6 @@ enum LogLevel {
         return "debug";
       case LogLevel.fatal:
         return "fatal";
-      default:
-        return "info";
     }
   }
 }
