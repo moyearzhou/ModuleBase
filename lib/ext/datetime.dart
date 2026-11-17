@@ -1,4 +1,4 @@
-
+import 'package:flutter/widgets.dart';
 
 import '../res/l10n.dart';
 
@@ -39,6 +39,8 @@ extension DateTimeX on DateTime {
     String hmsSep = ':',
     String sep = ' ',
     DateTime? nowOverride,
+    BuildContext? context,
+    Locale? locale,
   }) {
     final now = nowOverride ?? DateTime.now();
     final isToday = year == now.year && month == now.month && day == now.day;
@@ -46,12 +48,19 @@ extension DateTimeX on DateTime {
       return hm(hmsSep);
     }
 
-    final yesterday = now.subtract(const Duration(days: 1));
-    final yesterdayZero =
-        DateTime(yesterday.year, yesterday.month, yesterday.day);
-    final isYesterday = day == yesterdayZero.day;
+    // Calendar subtraction handles DST; compare the full date to avoid labeling
+    // the same day number in another month or year as yesterday.
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+    final isYesterday = year == yesterday.year &&
+        month == yesterday.month &&
+        day == yesterday.day;
     if (isYesterday) {
-      return '${l10n.yesterday} $sep${hm(hmsSep)}';
+      final messages = locale != null
+          ? AppLocal.resolve(locale)
+          : context != null
+              ? AppLocal.of(context)
+              : l10n;
+      return '${messages.yesterday}$sep${hm(hmsSep)}';
     }
 
     if (year == now.year) {

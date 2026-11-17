@@ -282,7 +282,14 @@ final class Btn extends StatelessWidget {
       style: padding != null
           ? ButtonStyle(padding: WidgetStateProperty.all(padding))
           : null,
-      child: Text(text, style: textStyle),
+      // Only the named default actions are translated; caller text stays literal.
+      child: Text(
+          switch (popVal) {
+            true => AppLocal.of(context).ok,
+            false => AppLocal.of(context).cancel,
+            _ => text,
+          },
+          style: textStyle),
     );
   }
 
@@ -401,7 +408,7 @@ extension Btnx on Btn {
   /// A [Btn.ok] which pops `true`
   ///
   /// {@template btnx_ok_non_final}
-  /// Use a getter instead of a `final` var to avoid [l10n] unfollowing.
+  /// The default label is resolved from the host locale during build.
   /// {@endtemplate}
   static Btn get ok => Btn.ok();
 

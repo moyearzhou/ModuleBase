@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../res/l10n.dart';
+
 final class CountDownBtn extends StatefulWidget {
   final int seconds;
   final String? text;
@@ -57,7 +59,9 @@ final class _CountDownBtnState extends State<CountDownBtn> {
         widget.onTap();
       },
       child: Text(
-        isCounting ? '$_seconds s' : widget.text ?? 'ok',
+        isCounting
+            ? AppLocal.of(context).secondsRemaining(_seconds)
+            : widget.text ?? AppLocal.of(context).ok,
         style: TextStyle(
           color: _seconds > 0 ? Colors.grey : widget.afterColor,
         ),

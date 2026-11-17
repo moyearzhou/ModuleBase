@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neatly/neatly.dart';
 
+import '../../res/l10n.dart';
 import 'neat_surface_theme.dart';
 
 /// Source-compatible dialog facade backed by Neatly.
@@ -9,8 +10,8 @@ class NeatDialogManager {
 
   static void showConfirmDialog(
     BuildContext context, {
-    required String cancel,
-    required String confirm,
+    String? cancel,
+    String? confirm,
     bool showIcon = false,
     Image? iconWidget,
     String? title,
@@ -33,41 +34,42 @@ class NeatDialogManager {
       barrierDismissible: barrierDismissible,
       builder: (dialogContext) => NeatSurfaceTheme(
         appearance: theme,
-        child: NeatlyDialog(
-          title: title ?? '',
-          message: message,
-          content: _DialogContent(
-            showIcon: showIcon,
-            iconWidget: iconWidget,
-            titleWidget: titleWidget,
-            messageWidget: messageWidget,
-            warning: warning,
-            warningWidget: warningWidget,
-          ),
-          actions: [
-            NeatlyDialogAction(
-              label: cancel,
-              onPressed: () {
-                if (onCancel != null) {
-                  onCancel(dialogContext);
-                } else {
-                  Navigator.of(dialogContext).maybePop();
-                }
-              },
-            ),
-            NeatlyDialogAction(
-              label: confirm,
-              primary: true,
-              onPressed: () {
-                if (onConfirm != null) {
-                  onConfirm(dialogContext);
-                } else {
-                  Navigator.of(dialogContext).maybePop();
-                }
-              },
-            ),
-          ],
-        ),
+        child: Builder(
+            builder: (context) => NeatlyDialog(
+                  title: title ?? '',
+                  message: message,
+                  content: _DialogContent(
+                    showIcon: showIcon,
+                    iconWidget: iconWidget,
+                    titleWidget: titleWidget,
+                    messageWidget: messageWidget,
+                    warning: warning,
+                    warningWidget: warningWidget,
+                  ),
+                  actions: [
+                    NeatlyDialogAction(
+                      label: cancel ?? AppLocal.of(context).cancel,
+                      onPressed: () {
+                        if (onCancel != null) {
+                          onCancel(dialogContext);
+                        } else {
+                          Navigator.of(dialogContext).maybePop();
+                        }
+                      },
+                    ),
+                    NeatlyDialogAction(
+                      label: confirm ?? AppLocal.of(context).confirm,
+                      primary: true,
+                      onPressed: () {
+                        if (onConfirm != null) {
+                          onConfirm(dialogContext);
+                        } else {
+                          Navigator.of(dialogContext).maybePop();
+                        }
+                      },
+                    ),
+                  ],
+                )),
       ),
     );
   }

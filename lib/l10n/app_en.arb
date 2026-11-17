@@ -1,10 +1,10 @@
 {
   "@@locale": "en",
   "appTitle": "ZotPaper",
-  "ok": "ok",
-  "cancel": "cancel",
+  "ok": "OK",
+  "cancel": "Cancel",
   "settings": "Settings",
-  "yesterday": "yesterday",
+  "yesterday": "Yesterday",
   "sync": "Sync",
   "webdav": "WebDAV",
   "more": "More",
@@ -26,8 +26,8 @@
   "enableWebDAV": "Enable WebDAV",
   "attachmentSync": "Attachment Sync",
   "webdavConfig": "WebDAV Config",
-  "verify": "verify",
-  "confirm": "confirm",
+  "verify": "Verify",
+  "confirm": "Confirm",
   "allInsecureSSL": "Allow Insecure SSL",
   "download": "Download",
   "useExternalReader": "Use external pdf reader",
@@ -36,5 +36,157 @@
   "officialWebsites": "Website & Doc",
   "licenseMenuItem": "License",
   "privacyPolicy": "Privacy policy",
-  "helloWorld": "Hello, World!"
+  "helloWorld": "Hello, World!",
+  "demoTitle": "ModuleBase demo",
+  "demoHomeTitle": "ModuleBase localization",
+  "demoCounterDescription": "You have pressed the button this many times:",
+  "increment": "Increment",
+  "secondsRemaining": "{seconds} s",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "@appTitle": {
+    "description": "ModuleBase appTitle label."
+  },
+  "@ok": {
+    "description": "ModuleBase ok label."
+  },
+  "@cancel": {
+    "description": "ModuleBase cancel label."
+  },
+  "@settings": {
+    "description": "ModuleBase settings label."
+  },
+  "@yesterday": {
+    "description": "ModuleBase yesterday label."
+  },
+  "@sync": {
+    "description": "ModuleBase sync label."
+  },
+  "@webdav": {
+    "description": "ModuleBase webdav label."
+  },
+  "@more": {
+    "description": "ModuleBase more label."
+  },
+  "@chat": {
+    "description": "ModuleBase chat label."
+  },
+  "@basic": {
+    "description": "ModuleBase basic label."
+  },
+  "@app": {
+    "description": "ModuleBase app label."
+  },
+  "@library": {
+    "description": "ModuleBase library label."
+  },
+  "@pdf": {
+    "description": "ModuleBase pdf label."
+  },
+  "@attachment": {
+    "description": "ModuleBase attachment label."
+  },
+  "@configureWebDAV": {
+    "description": "ModuleBase configureWebDAV label."
+  },
+  "@uploadAttachment": {
+    "description": "ModuleBase uploadAttachment label."
+  },
+  "@about": {
+    "description": "ModuleBase about label."
+  },
+  "@address": {
+    "description": "ModuleBase address label."
+  },
+  "@username": {
+    "description": "ModuleBase username label."
+  },
+  "@password": {
+    "description": "ModuleBase password label."
+  },
+  "@none": {
+    "description": "ModuleBase none label."
+  },
+  "@instantSearch": {
+    "description": "ModuleBase instantSearch label."
+  },
+  "@loadLastViewed": {
+    "description": "ModuleBase loadLastViewed label."
+  },
+  "@enableWebDAV": {
+    "description": "ModuleBase enableWebDAV label."
+  },
+  "@attachmentSync": {
+    "description": "ModuleBase attachmentSync label."
+  },
+  "@webdavConfig": {
+    "description": "ModuleBase webdavConfig label."
+  },
+  "@verify": {
+    "description": "ModuleBase verify label."
+  },
+  "@confirm": {
+    "description": "ModuleBase confirm label."
+  },
+  "@allInsecureSSL": {
+    "description": "ModuleBase allInsecureSSL label."
+  },
+  "@download": {
+    "description": "ModuleBase download label."
+  },
+  "@useExternalReader": {
+    "description": "ModuleBase useExternalReader label."
+  },
+  "@shouldLiveSearch": {
+    "description": "ModuleBase shouldLiveSearch label."
+  },
+  "@other": {
+    "description": "ModuleBase other label."
+  },
+  "@officialWebsites": {
+    "description": "ModuleBase officialWebsites label."
+  },
+  "@licenseMenuItem": {
+    "description": "ModuleBase licenseMenuItem label."
+  },
+  "@privacyPolicy": {
+    "description": "ModuleBase privacyPolicy label."
+  },
+  "@helloWorld": {
+    "description": "ModuleBase helloWorld label."
+  },
+  "@demoTitle": {
+    "description": "ModuleBase demoTitle label."
+  },
+  "@demoHomeTitle": {
+    "description": "ModuleBase demoHomeTitle label."
+  },
+  "@demoCounterDescription": {
+    "description": "ModuleBase demoCounterDescription label."
+  },
+  "@increment": {
+    "description": "ModuleBase increment label."
+  },
+  "@secondsRemaining": {
+    "description": "ModuleBase secondsRemaining label.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "@showPassword": {
+    "description": "ModuleBase showPassword label."
+  },
+  "@hidePassword": {
+    "description": "ModuleBase hidePassword label."
+  },
+  "openPicker": "Open picker",
+  "openDialog": "Open dialog",
+  "@openPicker": {
+    "description": "ModuleBase demo openPicker action."
+  },
+  "@openDialog": {
+    "description": "ModuleBase demo openDialog action."
+  }
 }

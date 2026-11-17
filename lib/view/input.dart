@@ -4,6 +4,7 @@ import 'package:module_base/ext/widget.dart';
 import 'package:module_base/model/rnode.dart';
 
 import '../utils/store/iface.dart';
+import '../res/l10n.dart';
 import 'card.dart';
 
 class Input extends StatefulWidget {
@@ -148,6 +149,9 @@ class _InputState extends State<Input> {
 
     return IconButton(
       icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+      tooltip: obscureText
+          ? AppLocal.of(context).showPassword
+          : AppLocal.of(context).hidePassword,
       onPressed: () {
         _obscureText.value = !obscureText;
         widget.onViewPwdTap?.call(obscureText);

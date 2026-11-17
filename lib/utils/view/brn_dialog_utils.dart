@@ -7,8 +7,8 @@ class BrnDialogUtils {
 
   static void showConfirmDialog(
     BuildContext context, {
-    required String cancel,
-    required String confirm,
+    String? cancel,
+    String? confirm,
     bool showIcon = false,
     Image? iconWidget,
     String? title,

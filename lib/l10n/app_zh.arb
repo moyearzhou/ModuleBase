@@ -1,7 +1,7 @@
 {
   "@@locale": "zh",
-  "appTitle": "Flutter Multi-Language",
-  "ok": "ok",
+  "appTitle": "ZotPaper",
+  "ok": "确定",
   "cancel": "取消",
   "more": "更多",
   "settings": "设置",
@@ -35,5 +35,15 @@
   "officialWebsites": "官网",
   "licenseMenuItem": "许可",
   "privacyPolicy": "隐私政策",
-  "helloWorld": "你好世界！"
+  "helloWorld": "你好世界！",
+  "demoTitle": "ModuleBase 演示",
+  "demoHomeTitle": "ModuleBase 国际化",
+  "demoCounterDescription": "你已点击按钮的次数：",
+  "increment": "增加",
+  "secondsRemaining": "{seconds} 秒",
+  "showPassword": "显示密码",
+  "hidePassword": "隐藏密码",
+  "download": "下载",
+  "openPicker": "打开选择面板",
+  "openDialog": "打开确认弹窗"
 }

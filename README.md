@@ -34,3 +34,38 @@ flutter pub publish --dry-run
 ## 许可
 
 本包按 [内部专有许可](LICENSE) 提供给获授权成员；第三方材料仍遵循其原有许可。
+
+## 国际化（开发分支）
+
+文案使用 `lib/l10n/app_en.arb`、`app_zh.arb` 和 Flutter `gen-l10n`，生成独立的 `ModuleBaseLocalizations` 类型，与宿主、Neatly 的 delegate 分离。宿主统一决定语言：
+
+```dart
+import 'package:module_base/res/l10n.dart';
+import 'package:neatly/neatly.dart';
+
+MaterialApp(
+  locale: selectedLocale,
+  supportedLocales: AppLocal.supportedLocales,
+  localizationsDelegates: const [
+    ...ModuleBaseLocalizations.localizationsDelegates,
+    NeatlyLocalizations.delegate,
+    // 注册宿主及其他 SDK 自己的 delegate。
+  ],
+  home: const HomePage(),
+);
+```
+
+组件通过 `AppLocal.of(context)` 或 `context.moduleBaseL10n`（导入 `ext/l10n.dart`）读取当前宿主文案，不修改全局语言。弹窗和选择面板的默认按钮随语言实时刷新并保留输入；调用方显式传入的文字（包括空字符串）优先，调用方负责翻译标题、内容和业务选项。
+
+旧导入路径 `generated/l10n/l10n*.dart` 及 `AppLocalizations*` 名称继续兼容。旧宿主未注册 ModuleBase delegate 时，组件按宿主 `Localizations.locale` 解析；不支持的语言回退英文，同一语言的地区变体共用语言资源。宿主支持新语言前，应先补齐各 SDK 对应 ARB 并重新生成，不能只修改宿主的 `supportedLocales`。
+
+日期展示建议使用 `date.simple(context: context)`；无界面的格式化可以传 `locale:`。旧的 `l10n`、`AppLocal.syncSystem()` 仅作为无 context 调用的兼容入口，宿主手动切换语言时可用 `AppLocal.setLocale(selectedLocale)` 同步该兼容值；页面组件不依赖这个可变值。
+
+```sh
+flutter gen-l10n
+flutter test test/l10n/module_base_localizations_test.dart test/screen_density/live_surfaces_test.dart
+```
+
+本机开发在当前测试根工程的 `pubspec_overrides.yaml` 指向本地 Neatly；宿主集成时同时 override 本地 `module_base` 和 `neatly`。本地覆盖文件和包含本机路径的 lock 变更不提交，本次不发布 Pub 包。
+
+`lib/main.dart` 提供中英文切换、计数器、弹窗和选择面板演示；语言切换由演示宿主管理。

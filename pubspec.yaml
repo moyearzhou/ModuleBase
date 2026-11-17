@@ -124,6 +124,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 flutter:
+  generate: true
   assets:
     - assets/
     - assets/image/
