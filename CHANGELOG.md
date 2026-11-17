@@ -1,3 +1,8 @@
+## 1.0.4 - 2026-11-16
+
+* Allow device_info_plus 11.x and 12.x so hosted PDF Viewer and ModuleLibrary can resolve together.
+* Preserve ModuleBase runtime source and compatibility with existing 11.x hosts.
+
 ## 1.0.3 - 2026-11-16
 
 * 首次发布到私有 pub：`https://pub.zotpaper.cn`。
