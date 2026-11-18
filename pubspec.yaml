@@ -15,7 +15,7 @@ description: "ZotPaper公共基类"
 # This version is used _only_ for the Runner app, which is used if you just do
 # a `flutter run` or a `flutter make-host-app-editable`. It has no impact
 # on any other native host app that you embed your Flutter project into.
-version: 1.0.4
+version: 1.1.0
 publish_to: https://pub.zotpaper.cn
 repository: https://github.com/moyearzhou/ModuleBase
 
@@ -113,7 +113,7 @@ dependencies:
 
   neatly:
     hosted: https://pub.zotpaper.cn
-    version: ^0.0.5
+    version: ^0.1.0
 
 dev_dependencies:
   flutter_test:
